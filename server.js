@@ -52,10 +52,18 @@ app.get('/login', (req, res) => {
             client_id: CLIENT_ID,
             scope: scope,
             redirect_uri: REDIRECT_URI,
-            state: generateRandomString(16)
+            state: generateRandomString(16),
+            show_dialog: 'true' // Force consent screen to appear
         });
     
     res.redirect(authURL);
+});
+
+// Logout route - redirects to Spotify logout
+app.get('/logout', (req, res) => {
+    // Redirect to Spotify logout, then back to our app
+    const spotifyLogoutURL = `https://accounts.spotify.com/en/logout?continue=${encodeURIComponent(REDIRECT_URI.replace('/callback', ''))}`;
+    res.redirect(spotifyLogoutURL);
 });
 
 // Handle callback from Spotify

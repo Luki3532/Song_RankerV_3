@@ -78,7 +78,11 @@
         </div>
 
         <div id="setup-warning" class="warning">
-            <strong>Setup Required:</strong> Make sure to configure your Spotify API credentials in the <code>.env</code> file before testing the login functionality.
+            <strong>OAuth Flow Info:</strong> If you don't see the Spotify login screen and go directly to a token, 
+            you're likely already logged into Spotify in this browser. Try:<br>
+            1. Click "Logout from Spotify" first<br>
+            2. Use an incognito/private browser window<br>
+            3. Clear your browser cookies for Spotify
         </div>
 
         <h2>Features</h2>
@@ -91,6 +95,7 @@
 
         <h2>Actions</h2>
         <a href="/login" class="btn">🔑 Login with Spotify</a>
+        <a href="/logout" class="btn">🚪 Logout from Spotify</a>
         <button onclick="testProfile()" class="btn" id="test-profile-btn" disabled>👤 Test Profile API</button>
         <button onclick="clearTokens()" class="btn">🗑️ Clear Tokens</button>
 
@@ -175,6 +180,7 @@
             
             // Clear URL parameters
             window.history.replaceState({}, document.title, window.location.pathname);
+            alert('Tokens cleared! For a fresh OAuth experience, try using an incognito window.');
         }
     </script>
 </body>

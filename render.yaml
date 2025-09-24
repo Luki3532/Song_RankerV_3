@@ -5,7 +5,7 @@ services:
     name: spotify-api-app
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

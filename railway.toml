@@ -5,6 +5,10 @@
 [build]
 builder = "nixpacks"
 
+# Use modern npm install command
+[build.nixpacksConfig]
+buildCmd = "npm run build"
+
 # Service settings
 [service]
 type = "web"
