@@ -378,13 +378,30 @@
                 ? playlist.images[0].url 
                 : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTAiIGZpbGw9IiM0MDQwNDAiLz4KPHRleHQgeD0iMzAiIHk9IjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIyNCI+8J+OtTwvdGV4dD4KPC9zdmc+';
 
+            // Check for saved rankings
+            const savedRankings = getSavedRankingsForPlaylist(playlist.id);
+            let statusBadge = '';
+            let statsText = `${playlist.tracks.total} songs • Ready to rank`;
+            
+            if (savedRankings) {
+                if (savedRankings.isComplete) {
+                    statusBadge = '<div style="background: #27ae60; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; display: inline-block; margin-top: 8px;">✓ Ranked</div>';
+                    statsText = `${playlist.tracks.total} songs • Ranking complete`;
+                } else {
+                    const progress = Math.round((savedRankings.comparisons / savedRankings.totalComparisons) * 100);
+                    statusBadge = `<div style="background: #f39c12; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; display: inline-block; margin-top: 8px;">${progress}% complete</div>`;
+                    statsText = `${playlist.tracks.total} songs • ${savedRankings.comparisons}/${savedRankings.totalComparisons} comparisons`;
+                }
+            }
+
             card.innerHTML = `
                 <img src="${imageUrl}" alt="${playlist.name}" class="playlist-image">
                 <div class="playlist-info">
                     <h3>${playlist.name}</h3>
                     <p>${playlist.description || 'No description'}</p>
                     <div class="playlist-stats">
-                        ${playlist.tracks.total} songs • Ready to rank
+                        ${statsText}
+                        ${statusBadge}
                     </div>
                 </div>
             `;
@@ -396,6 +413,18 @@
             // Store playlist info and redirect to ranking page
             localStorage.setItem('current_playlist', JSON.stringify(playlist));
             window.location.href = '/rank.html';
+        }
+        
+        function getSavedRankingsForPlaylist(playlistId) {
+            try {
+                const saved = localStorage.getItem(`song_rankings_${playlistId}`);
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (error) {
+                console.error('Error loading saved rankings for playlist:', playlistId, error);
+            }
+            return null;
         }
 
         function logout() {

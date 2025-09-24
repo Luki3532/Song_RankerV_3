@@ -447,10 +447,27 @@
         }
 
         function initializeRanking() {
-            // Initialize ELO ratings for all songs
+            // Check if we have saved rankings for this playlist
+            const savedRankings = loadSavedRankings();
+            
+            if (savedRankings && savedRankings.songs.length === songs.length) {
+                // Load existing rankings
+                eloRatings = new Map(savedRankings.ratings);
+                comparisons = savedRankings.comparisons || 0;
+                console.log('Loaded saved rankings with', comparisons, 'comparisons completed');
+                
+                // Show option to continue or restart
+                if (comparisons > 0) {
+                    showContinueOrRestartDialog();
+                    return;
+                }
+            }
+            
+            // Initialize new ELO ratings for all songs
             songs.forEach(song => {
                 eloRatings.set(song.id, INITIAL_ELO);
             });
+            comparisons = 0;
 
             // Calculate total comparisons needed (roughly n log n comparisons)
             totalComparisons = Math.ceil(songs.length * Math.log2(songs.length));
@@ -584,6 +601,9 @@
 
             eloRatings.set(winnerId, newWinnerElo);
             eloRatings.set(loserId, newLoserElo);
+            
+            // Save rankings after each comparison
+            saveRankings();
         }
 
         function skipComparison() {
@@ -603,7 +623,12 @@
             document.getElementById('results-screen').style.display = 'block';
             
             const resultsDiv = document.getElementById('final-rankings');
-            resultsDiv.innerHTML = rankedSongs.map((song, index) => `
+            resultsDiv.innerHTML = `
+                <div style="background: rgba(52, 152, 219, 0.1); margin: 0 0 20px 0; padding: 15px; border-radius: 10px; border: 1px solid rgba(52, 152, 219, 0.3); text-align: center;">
+                    <div style="font-size: 0.9rem; opacity: 0.8;">✅ Rankings saved automatically</div>
+                    <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 5px;">Your progress is saved in this browser</div>
+                </div>
+            ` + rankedSongs.map((song, index) => `
                 <div style="background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; align-items: center;">
                     <div style="font-weight: bold; font-size: 1.2rem; margin-right: 15px; min-width: 30px;">#${index + 1}</div>
                     <img src="${song.album.images[0]?.url}" style="width: 50px; height: 50px; border-radius: 8px; margin-right: 15px;" onerror="this.style.display='none'">
@@ -614,6 +639,9 @@
                     <div style="color: #3498db; font-weight: bold;">${Math.round(eloRatings.get(song.id))}</div>
                 </div>
             `).join('');
+            
+            // Mark ranking as complete
+            saveRankings(true);
         }
 
         // Audio preview functions
@@ -695,6 +723,110 @@
         function goHome() {
             localStorage.removeItem('current_playlist');
             window.location.href = '/';
+        }
+        
+        // Storage functions
+        function getSavedRankingsKey() {
+            return `song_rankings_${currentPlaylist.id}`;
+        }
+        
+        function saveRankings(isComplete = false) {
+            const rankingData = {
+                playlistId: currentPlaylist.id,
+                playlistName: currentPlaylist.name,
+                songs: songs.map(song => ({ id: song.id, name: song.name, artist: song.artists[0].name })),
+                ratings: Array.from(eloRatings.entries()),
+                comparisons: comparisons,
+                totalComparisons: totalComparisons,
+                isComplete: isComplete,
+                lastUpdated: Date.now()
+            };
+            
+            try {
+                localStorage.setItem(getSavedRankingsKey(), JSON.stringify(rankingData));
+                console.log('Rankings saved for playlist:', currentPlaylist.name);
+            } catch (error) {
+                console.error('Error saving rankings:', error);
+            }
+        }
+        
+        function loadSavedRankings() {
+            try {
+                const saved = localStorage.getItem(getSavedRankingsKey());
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    console.log('Found saved rankings from:', new Date(data.lastUpdated).toLocaleString());
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error loading saved rankings:', error);
+            }
+            return null;
+        }
+        
+        function showContinueOrRestartDialog() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+                display: flex; align-items: center; justify-content: center; z-index: 1000;
+            `;
+            
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+                border-radius: 20px; padding: 30px; max-width: 400px; text-align: center;
+                border: 1px solid rgba(255,255,255,0.2);
+            `;
+            
+            dialog.innerHTML = `
+                <h3 style="margin: 0 0 15px 0; color: #3498db;">Resume Rankings?</h3>
+                <p style="margin: 0 0 20px 0; opacity: 0.8; line-height: 1.4;">
+                    You have ${comparisons} out of ${totalComparisons} comparisons completed for this playlist.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button id="continue-btn" style="
+                        background: linear-gradient(45deg, #3498db, #2980b9);
+                        color: white; border: none; padding: 12px 24px; border-radius: 25px;
+                        font-weight: 600; cursor: pointer; flex: 1;
+                    ">Continue</button>
+                    <button id="restart-btn" style="
+                        background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);
+                        padding: 12px 24px; border-radius: 25px; font-weight: 600; cursor: pointer; flex: 1;
+                    ">Start Over</button>
+                </div>
+            `;
+            
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            
+            // Event listeners
+            document.getElementById('continue-btn').onclick = () => {
+                document.body.removeChild(overlay);
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('ranking-interface').style.display = 'block';
+                
+                if (comparisons >= totalComparisons) {
+                    showResults();
+                } else {
+                    nextComparison();
+                }
+            };
+            
+            document.getElementById('restart-btn').onclick = () => {
+                document.body.removeChild(overlay);
+                
+                // Clear saved data and start fresh
+                localStorage.removeItem(getSavedRankingsKey());
+                songs.forEach(song => {
+                    eloRatings.set(song.id, INITIAL_ELO);
+                });
+                comparisons = 0;
+                
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('ranking-interface').style.display = 'block';
+                nextComparison();
+            };
         }
     </script>
 </body>
