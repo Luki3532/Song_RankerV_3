@@ -249,113 +249,60 @@ app.get('/playlist/:id/tracks-with-previews', async (req, res) => {
         return res.status(401).json({ error: 'No authorization token provided' });
     }
 
-    // Helper: Axios GET with auth and params
-    const getWithAuth = async (url, params = {}) => {
-        return axios({
-            method: 'GET',
-            url,
-            headers: { 'Authorization': token },
-            params
-        });
-    };
-
-    // Helper: Sleep
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    // Helper: Try to enrich a single track with a preview_url using multiple strategies
-    const enrichTrackWithPreview = async (baseTrack) => {
-        // 1) If preview already present, return as-is
-        if (baseTrack.preview_url) return baseTrack;
-
-        // 2) Fetch full track details (may include preview depending on market)
-        try {
-            const trackResp = await getWithAuth(`https://api.spotify.com/v1/tracks/${baseTrack.id}`, { market: 'from_token' });
-            if (trackResp?.data?.preview_url) {
-                return { ...baseTrack, preview_url: trackResp.data.preview_url };
-            }
-            // Keep external_ids if present for ISRC search
-            baseTrack = { ...trackResp.data, ...baseTrack };
-        } catch (e) {
-            // ignore and continue to next strategy
-        }
-
-        // 3) If we have ISRC, search by ISRC which is precise
-        const isrc = baseTrack?.external_ids?.isrc;
-        if (isrc) {
-            try {
-                const searchIsrc = await getWithAuth('https://api.spotify.com/v1/search', {
-                    q: `isrc:${isrc}`,
-                    type: 'track',
-                    limit: 5,
-                    market: 'from_token'
-                });
-                const withPreview = searchIsrc?.data?.tracks?.items?.find(t => t.preview_url);
-                if (withPreview) {
-                    return { ...baseTrack, preview_url: withPreview.preview_url };
-                }
-            } catch (e) {
-                // continue
-            }
-        }
-
-        // 4) Search by track and primary artist name; check multiple candidates for preview_url
-        const primaryArtist = baseTrack.artists?.[0]?.name || '';
-        const query = `${baseTrack.name} artist:${primaryArtist}`;
-        const trySearches = [
-            { q: query, market: 'from_token' },
-            { q: query, market: 'US' },
-            { q: `${baseTrack.name} ${primaryArtist}`, market: 'from_token' }
-        ];
-        for (const params of trySearches) {
-            try {
-                const searchResp = await getWithAuth('https://api.spotify.com/v1/search', {
-                    ...params,
-                    type: 'track',
-                    limit: 5
-                });
-                const candidate = searchResp?.data?.tracks?.items?.find(t => t.preview_url);
-                if (candidate) {
-                    return { ...baseTrack, preview_url: candidate.preview_url };
-                }
-            } catch (e) {
-                // ignore and try next
-            }
-        }
-
-        // 5) Give up, return original without preview
-        return baseTrack;
-    };
-
     try {
-        // Paginate playlist tracks (up to 100 to keep latency reasonable)
-        const items = [];
-        let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`;
-        for (let page = 0; page < 2 && nextUrl; page++) { // up to 2 pages => 100 tracks
-            const pageResp = await getWithAuth(nextUrl, { market: 'from_token' });
-            const pageData = pageResp.data;
-            (pageData.items || []).forEach(it => { if (it.track && it.track.id) items.push(it); });
-            nextUrl = pageData.next;
-        }
+        // First get the playlist tracks
+        const playlistResponse = await axios({
+            method: 'GET',
+            url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+            headers: {
+                'Authorization': token
+            }
+        });
 
-        if (items.length === 0) {
+        const playlistTracks = playlistResponse.data.items.filter(item => item.track && item.track.name);
+        
+        if (playlistTracks.length === 0) {
             return res.json({ items: [] });
         }
 
-        // Process tracks sequentially with tiny delay to be gentle on rate limits
-        const enhanced = [];
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            try {
-                const enriched = await enrichTrackWithPreview(item.track);
-                enhanced.push({ track: enriched });
-            } catch (e) {
-                enhanced.push(item); // fallback to original
-            }
-            // Small delay every few requests
-            if (i % 5 === 4) await sleep(150);
-        }
+        // For each track, search for it to get complete data with preview URLs
+        const enhancedTracks = await Promise.all(
+            playlistTracks.slice(0, 20).map(async (item) => { // Limit to 20 tracks to avoid rate limits
+                try {
+                    const searchQuery = `${item.track.name} artist:${item.track.artists[0].name}`;
+                    const searchResponse = await axios({
+                        method: 'GET',
+                        url: 'https://api.spotify.com/v1/search',
+                        headers: {
+                            'Authorization': token
+                        },
+                        params: {
+                            q: searchQuery,
+                            type: 'track',
+                            limit: 1
+                        }
+                    });
 
-        res.json({ items: enhanced });
+                    if (searchResponse.data.tracks.items.length > 0) {
+                        const searchTrack = searchResponse.data.tracks.items[0];
+                        // Return the search result track which should have preview_url
+                        return {
+                            track: {
+                                ...item.track,
+                                preview_url: searchTrack.preview_url
+                            }
+                        };
+                    }
+                    
+                    return item; // Return original if search fails
+                } catch (searchError) {
+                    console.log('Search failed for track:', item.track.name);
+                    return item; // Return original if search fails
+                }
+            })
+        );
+
+        res.json({ items: enhancedTracks });
     } catch (error) {
         res.status(400).json({
             error: 'Failed to fetch tracks with previews',
