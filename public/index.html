@@ -153,7 +153,6 @@
             color: white;
             min-height: 100vh;
             overflow-x: hidden;
-            padding-bottom: var(--space-20); /* Space for bottom nav */
             position: relative;
         }
         
@@ -442,110 +441,6 @@
             transform: scale(1.1);
         }
 
-        /* ===== BOTTOM NAVIGATION ===== */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--glass-dark-strong);
-            backdrop-filter: blur(30px) saturate(180%);
-            border-top: 1px solid var(--glass-white);
-            padding: var(--space-3) 0 calc(var(--space-6) + env(safe-area-inset-bottom, 0px)) 0;
-            z-index: var(--z-overlay);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .bottom-nav::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--gradient-primary);
-            opacity: 0.03;
-            pointer-events: none;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: var(--space-1);
-            padding: var(--space-3) var(--space-4);
-            border-radius: var(--radius-xl);
-            text-decoration: none;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all var(--transition-fast);
-            min-width: 60px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--gradient-accent);
-            opacity: 0;
-            border-radius: var(--radius-xl);
-            transition: all var(--transition-fast);
-            transform: scale(0.8);
-        }
-        
-        .nav-item.active::before {
-            opacity: 0.15;
-            transform: scale(1);
-        }
-        
-        .nav-item:hover::before {
-            opacity: 0.1;
-            transform: scale(1);
-        }
-        
-        .nav-item.active {
-            color: var(--primary-300);
-            background: var(--glass-white);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow);
-        }
-        
-        .nav-item:hover {
-            color: rgba(255, 255, 255, 0.9);
-            transform: translateY(-1px);
-        }
-        
-        .nav-item:active {
-            transform: translateY(0) scale(0.95);
-        }
-        
-        .nav-icon {
-            font-size: 1.25rem;
-            transition: all var(--transition-fast);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .nav-item.active .nav-icon {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 8px currentColor);
-        }
-        
-        .nav-label {
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            letter-spacing: 0.025em;
-            position: relative;
-            z-index: 1;
-        }
-        
         /* ===== MAIN LAYOUT ===== */
         .app-header {
             display: none; /* Hide on mobile, use mobile-header instead */
@@ -1184,7 +1079,6 @@
             .playlists-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
-                margin-bottom: 120px; /* Account for bottom nav */
             }
 
             .playlist-item {
@@ -1298,14 +1192,6 @@
 
             .main-content {
                 padding-top: 10px;
-            }
-
-            .bottom-nav {
-                padding: 5px 0 15px 0;
-            }
-
-            .nav-item {
-                padding: 6px 10px;
             }
 
             .nav-label {
@@ -1642,26 +1528,6 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <a href="#" class="nav-item active">
-            <div class="nav-icon">🏠</div>
-            <div class="nav-label">Home</div>
-        </a>
-        <a href="#" class="nav-item" onclick="showSettings()">
-            <div class="nav-icon">⚙️</div>
-            <div class="nav-label">Settings</div>
-        </a>
-        <a href="coming-soon.html" class="nav-item">
-            <div class="nav-icon">🚀</div>
-            <div class="nav-label">Coming Soon</div>
-        </a>
-        <a href="#" class="nav-item" onclick="showProfile()">
-            <div class="nav-icon">👤</div>
-            <div class="nav-label">Profile</div>
-        </a>
-    </div>
-
     <script>
         let currentUser = null;
         let userToken = null;
@@ -1694,6 +1560,8 @@
 
         async function initializeApp() {
             try {
+                console.log('Initializing app with token:', userToken ? 'Token exists' : 'No token');
+                
                 // Get user profile
                 const userResponse = await fetch('/me', {
                     headers: {
@@ -1701,17 +1569,27 @@
                     }
                 });
 
+                console.log('User profile response status:', userResponse.status);
+
                 if (userResponse.ok) {
                     currentUser = await userResponse.json();
+                    console.log('User profile loaded:', currentUser);
                     updateUserProfile();
                     loadPlaylists();
                 } else {
+                    console.error('User profile request failed:', userResponse.status, userResponse.statusText);
                     // Token might be expired
                     localStorage.removeItem('spotify_token');
                     showAuthSection();
                 }
             } catch (error) {
                 console.error('Error initializing app:', error);
+                
+                // Show connection error
+                if (error.message.includes('Failed to fetch')) {
+                    alert('Cannot connect to server. Make sure your backend is running.');
+                }
+                
                 showAuthSection();
             }
         }
@@ -1745,23 +1623,46 @@
             try {
                 document.getElementById('playlists-loading').style.display = 'block';
                 
+                console.log('Loading playlists with token:', userToken ? 'Token exists' : 'No token');
+                
                 const response = await fetch('/playlists', {
                     headers: {
                         'Authorization': `Bearer ${userToken}`
                     }
                 });
 
+                console.log('Playlists response status:', response.status);
+
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Playlists data received:', data);
                     allPlaylists = data.items || [];
                     displayPlaylists();
                 } else {
-                    throw new Error('Failed to load playlists');
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`Failed to load playlists: ${response.status} ${response.statusText}`);
                 }
             } catch (error) {
                 console.error('Error loading playlists:', error);
-                document.getElementById('playlists-loading').innerHTML = 
-                    '<p>Unable to load playlists. Please try refreshing.</p>';
+                
+                // More helpful error message
+                const errorElement = document.getElementById('playlists-loading');
+                if (error.message.includes('Failed to fetch')) {
+                    errorElement.innerHTML = 
+                        '<div style="text-align: center; padding: 40px 20px; opacity: 0.8;">' +
+                        '<p>❌ Cannot connect to server</p>' +
+                        '<p style="font-size: 14px; margin-top: 10px;">Make sure your backend server is running on the correct port.</p>' +
+                        '<button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: var(--spotify-green); color: white; border: none; border-radius: 6px; cursor: pointer;">Try Again</button>' +
+                        '</div>';
+                } else {
+                    errorElement.innerHTML = 
+                        '<div style="text-align: center; padding: 40px 20px; opacity: 0.8;">' +
+                        '<p>⚠️ Unable to load playlists</p>' +
+                        '<p style="font-size: 14px; margin-top: 10px;">' + error.message + '</p>' +
+                        '<button onclick="loadPlaylists()" style="margin-top: 15px; padding: 8px 16px; background: var(--spotify-green); color: white; border: none; border-radius: 6px; cursor: pointer;">Retry</button>' +
+                        '</div>';
+                }
             }
         }
 
