@@ -403,7 +403,8 @@
                     return;
                 }
 
-                const response = await fetch(`/playlist/${currentPlaylist.id}/tracks`, {
+                // Try the enhanced endpoint first
+                let response = await fetch(`/playlist/${currentPlaylist.id}/tracks-enhanced`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -412,6 +413,12 @@
                 if (response.ok) {
                     const data = await response.json();
                     songs = data.items.filter(item => item.track).map(item => item.track);
+                    
+                    // Debug: Log the full structure of the first track to see what fields are available
+                    if (songs.length > 0) {
+                        console.log('Enhanced endpoint - Full track object structure:', JSON.stringify(songs[0], null, 2));
+                        console.log('Available fields:', Object.keys(songs[0]));
+                    }
                     
                     const songsWithPreviews = songs.filter(song => song.preview_url).length;
                     

@@ -191,6 +191,55 @@ app.get('/playlist/:id/tracks', async (req, res) => {
     }
 });
 
+// Enhanced playlist tracks endpoint that fetches full track details
+app.get('/playlist/:id/tracks-enhanced', async (req, res) => {
+    const token = req.headers.authorization;
+    const playlistId = req.params.id;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    try {
+        // First get the playlist tracks
+        const playlistResponse = await axios({
+            method: 'GET',
+            url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        const playlistTracks = playlistResponse.data.items.filter(item => item.track && item.track.id);
+        const trackIds = playlistTracks.map(item => item.track.id).slice(0, 50); // Limit to 50 tracks
+        
+        if (trackIds.length === 0) {
+            return res.json({ items: [] });
+        }
+
+        // Fetch full track details in batch (up to 50 tracks per request)
+        const tracksResponse = await axios({
+            method: 'GET',
+            url: `https://api.spotify.com/v1/tracks?ids=${trackIds.join(',')}`,
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        // Format response to match playlist tracks structure
+        const enhancedItems = tracksResponse.data.tracks.map(track => ({
+            track: track
+        }));
+
+        res.json({ items: enhancedItems });
+    } catch (error) {
+        res.status(400).json({
+            error: 'Failed to fetch enhanced playlist tracks',
+            message: error.message
+        });
+    }
+});
+
 // Utility function to generate random string
 function generateRandomString(length) {
     let result = '';
