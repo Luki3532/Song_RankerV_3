@@ -5,11 +5,24 @@ const querystring = require('querystring');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Spotify API credentials
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
-const REDIRECT_URI = process.env.REDIRECT_URI || 'http://localhost:3000/callback';
+const REDIRECT_URI = process.env.REDIRECT_URI || 
+    (NODE_ENV === 'production' ? 
+     `https://${process.env.RENDER_EXTERNAL_HOSTNAME || process.env.RAILWAY_PUBLIC_DOMAIN}/callback` :
+     'http://localhost:3000/callback');
+
+// Validation for required environment variables
+if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.error('❌ Missing required Spotify API credentials!');
+    console.error('Please set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET environment variables.');
+    if (NODE_ENV === 'development') {
+        console.error('Check your .env file or environment configuration.');
+    }
+}
 
 // Middleware
 app.use(express.json());
@@ -18,6 +31,16 @@ app.use(express.static('public'));
 // Routes
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
+});
+
+// Health check endpoint (for deployment platforms)
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'healthy', 
+        environment: NODE_ENV,
+        timestamp: new Date().toISOString(),
+        redirectUri: REDIRECT_URI
+    });
 });
 
 // Redirect to Spotify authorization
@@ -114,6 +137,12 @@ function generateRandomString(length) {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📝 Make sure to set your environment variables in .env file`);
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${NODE_ENV}`);
+    console.log(`🔄 Redirect URI: ${REDIRECT_URI}`);
+    if (NODE_ENV === 'development') {
+        console.log(`🏠 Local URL: http://localhost:${PORT}`);
+        console.log(`📝 Make sure to set your environment variables in .env file`);
+    }
+    console.log(`❤️ Health check available at /health`);
 });
