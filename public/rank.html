@@ -267,10 +267,26 @@
             touch-action: manipulation;
         }
         
+        /* Logo Home Button Styling */
+        .logo-home-btn {
+            background: linear-gradient(135deg, var(--spotify-green), var(--spotify-green-hover));
+            border: 2px solid var(--spotify-green-bright);
+            color: var(--spotify-white);
+            font-size: 1.4rem;
+            box-shadow: 0 4px 20px rgba(29, 185, 84, 0.3);
+        }
+        
         .back-btn:hover {
             background: var(--spotify-gray-600);
             border-color: var(--spotify-gray-500);
             transform: scale(1.05);
+        }
+        
+        .logo-home-btn:hover {
+            background: linear-gradient(135deg, var(--spotify-green-hover), var(--spotify-green-bright));
+            border-color: #1fff6b;
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(29, 185, 84, 0.5);
         }
         
         .back-btn:active {
@@ -1031,7 +1047,12 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* Mobile SMART-SCROLL Optimizations - FIXED OVERLAP ISSUES */
+        /* Hide mobile swipe instruction on desktop */
+        .mobile-swipe-instruction {
+            display: none;
+        }
+        
+        /* Mobile SIMPLE SWIPE Interface - CLEAN & MINIMAL */
         @media (max-width: 640px) {
             html, body {
                 height: 100vh;
@@ -1270,17 +1291,56 @@
                 text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
             }
             
+            /* Hide action buttons on mobile - swipe interface only */
             .action-buttons {
-                display: flex;
-                flex-direction: row;
-                gap: clamp(8px, 2vw, 12px);
-                padding: clamp(12px, 3vw, 16px);
-                flex-shrink: 0;
-                position: sticky;
-                bottom: 0;
+                display: none !important;
+            }
+            
+            /* Hide VS indicator on mobile for cleaner look */
+            .vs-indicator {
+                display: none !important;
+            }
+            
+            /* Add swipe instruction for mobile */
+            .mobile-swipe-instruction {
+                display: block;
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
                 background: rgba(0, 0, 0, 0.95);
-                backdrop-filter: blur(15px);
-                border-top: 1px solid rgba(29, 185, 84, 0.2);
+                backdrop-filter: blur(20px);
+                color: var(--spotify-green-bright);
+                padding: clamp(10px, 2.5vw, 14px) clamp(18px, 4.5vw, 28px);
+                border-radius: clamp(12px, 3vw, 16px);
+                border: 2px solid rgba(29, 185, 84, 0.4);
+                font-size: clamp(0.75rem, 2.8vw, 0.9rem);
+                font-weight: 700;
+                text-align: center;
+                z-index: 1000;
+                box-shadow: 
+                    0 8px 30px rgba(0, 0, 0, 0.8),
+                    0 0 20px rgba(29, 185, 84, 0.2);
+                animation: pulseGlow 3s ease-in-out infinite;
+                max-width: 90vw;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            @keyframes pulseGlow {
+                0%, 100% {
+                    box-shadow: 
+                        0 8px 30px rgba(0, 0, 0, 0.8),
+                        0 0 20px rgba(29, 185, 84, 0.2);
+                    border-color: rgba(29, 185, 84, 0.4);
+                }
+                50% {
+                    box-shadow: 
+                        0 8px 30px rgba(0, 0, 0, 0.8),
+                        0 0 30px rgba(29, 185, 84, 0.4);
+                    border-color: rgba(29, 185, 84, 0.6);
+                }
             }
 
             .action-btn {
@@ -1781,7 +1841,7 @@
     <!-- Main Ranking Interface -->
     <div class="ranking-interface" id="ranking-interface" style="display: none;">
         <div class="ranking-header">
-            <button class="back-btn" onclick="goBack()">←</button>
+            <button class="back-btn logo-home-btn" onclick="goHome()">🎵</button>
             <div class="playlist-title" id="playlist-title">Loading...</div>
             <div class="progress-indicator" id="progress">0/0</div>
         </div>
@@ -1840,6 +1900,11 @@
             </div>
             
             <div class="vs-indicator">VS</div>
+            
+            <!-- Mobile Swipe Instruction -->
+            <div class="mobile-swipe-instruction">
+                ← TOP • BOTTOM →
+            </div>
             
             <div class="action-buttons">
                 <button class="action-btn action-btn-left" onclick="selectLeft()">👈 Choose Left</button>
@@ -2305,17 +2370,23 @@
                 
                 if (Math.abs(diffX) > threshold) {
                     // Swipe detected - complete the action
+                    // TOP CARD (left/first): Swipe LEFT to select it as winner
+                    // BOTTOM CARD (right/second): Swipe RIGHT to select it as winner
                     if (diffX > 0) {
-                        // Swiped right
+                        // Swiped right - select bottom card (right side)
                         card.style.transform = 'translateX(100%) rotate(20deg)';
                         setTimeout(() => {
-                            side === 'left' ? selectLeft() : selectRight();
+                            if (side === 'right') {
+                                selectRight(); // Bottom card wins
+                            }
                         }, 150);
                     } else {
-                        // Swiped left
+                        // Swiped left - select top card (left side) 
                         card.style.transform = 'translateX(-100%) rotate(-20deg)';
                         setTimeout(() => {
-                            side === 'right' ? selectLeft() : selectRight();
+                            if (side === 'left') {
+                                selectLeft(); // Top card wins
+                            }
                         }, 150);
                     }
                 } else {
