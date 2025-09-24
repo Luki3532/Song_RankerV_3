@@ -900,18 +900,90 @@
             -webkit-text-fill-color: transparent;
         }
         
+        /* Mobile NO-SCROLL Optimizations - All content fits in viewport */
         @media (max-width: 640px) {
-            .song-cards {
+            html, body {
+                height: 100vh;
+                overflow: hidden;
+                font-size: clamp(12px, 2.5vw, 16px);
+            }
+            
+            .comparison-container {
+                height: 100vh;
+                display: flex;
                 flex-direction: column;
-                gap: 20px;
-                padding: 16px;
+                padding: clamp(8px, 2vw, 16px);
+                overflow: hidden;
+            }
+            
+            .ranking-header {
+                padding: clamp(8px, 2vw, 12px);
+                flex-shrink: 0;
+                height: auto;
+                min-height: clamp(60px, 12vh, 80px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+            .playlist-title {
+                font-size: clamp(0.9rem, 4vw, 1.2rem);
+                max-width: none;
+                line-height: 1.2;
+            }
+            
+            .progress-indicator {
+                font-size: clamp(0.8rem, 3.5vw, 1rem);
+                margin-top: clamp(4px, 1vw, 8px);
+            }
+            
+            .smart-ranker-indicator {
+                margin-bottom: clamp(4px, 1vw, 8px);
+            }
+            
+            .smart-ranker-indicator div {
+                padding: clamp(4px, 1vw, 8px) clamp(8px, 2vw, 12px);
+                font-size: clamp(0.7rem, 3vw, 0.85rem);
+            }
+            
+            .smart-ranker-indicator svg {
+                width: clamp(12px, 3vw, 16px);
+                height: clamp(12px, 3vw, 16px);
+            }
+            
+            .song-cards {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: clamp(12px, 3vw, 20px);
+                padding: 0;
+                justify-content: center;
+                align-items: center;
+                max-height: 70vh;
+                overflow: visible;
             }
             
             .song-card {
-                width: 100%;
-                max-width: 350px;
-                height: 420px;
-                margin: 0 auto;
+                width: clamp(280px, 85vw, 350px);
+                height: clamp(320px, 60vh, 420px);
+                margin: 0;
+                flex-shrink: 0;
+            }
+            
+            /* Scale card content dynamically */
+            .song-card .card-image {
+                height: clamp(160px, 35vh, 200px);
+                border-radius: clamp(8px, 2vw, 12px);
+            }
+            
+            .song-card .song-info h3 {
+                font-size: clamp(0.9rem, 4vw, 1.2rem);
+                line-height: 1.2;
+            }
+            
+            .song-card .song-info p {
+                font-size: clamp(0.75rem, 3.5vw, 1rem);
+                line-height: 1.2;
             }
             
             .vs-indicator {
@@ -919,24 +991,19 @@
             }
             
             .action-buttons {
+                flex-shrink: 0;
                 flex-direction: column;
-                gap: var(--space-4);
-                padding: var(--space-5) var(--space-4);
+                gap: clamp(8px, 2vw, 12px);
+                padding: clamp(8px, 2vw, 16px);
+                height: auto;
+                min-height: clamp(80px, 15vh, 120px);
             }
 
             .action-btn {
-                padding: var(--space-4) var(--space-5);
-                font-size: var(--font-size-base);
-                min-height: var(--touch-target);
-            }
-
-            .ranking-header {
-                padding: var(--space-5) var(--space-4);
-            }
-
-            .playlist-title {
-                font-size: var(--font-size-base);
-                max-width: 160px;
+                padding: clamp(10px, 2.5vw, 14px) clamp(16px, 4vw, 24px);
+                font-size: clamp(0.8rem, 3.5vw, 1rem);
+                min-height: clamp(36px, 8vw, 44px);
+                border-radius: clamp(8px, 2vw, 12px);
             }
 
             .progress-indicator {
@@ -1025,26 +1092,96 @@
             }
         }
 
-        /* Extra small mobile devices */
+        /* Extra small mobile devices - Ultra compact */
         @media (max-width: 375px) {
-            .song-card {
-                max-width: 280px;
-                height: 320px;
+            html, body {
+                font-size: clamp(11px, 3vw, 14px);
             }
-
+            
             .ranking-header {
-                padding: 15px 10px;
+                padding: clamp(6px, 2vw, 10px);
+                min-height: clamp(50px, 10vh, 70px);
+            }
+            
+            .playlist-title {
+                font-size: clamp(0.8rem, 4vw, 1rem);
+            }
+            
+            .progress-indicator {
+                font-size: clamp(0.7rem, 3.5vw, 0.9rem);
+            }
+            
+            .song-card {
+                width: clamp(260px, 90vw, 300px);
+                height: clamp(280px, 55vh, 340px);
+            }
+            
+            .song-card .card-image {
+                height: clamp(140px, 30vh, 180px);
+            }
+            
+            .song-card .song-info h3 {
+                font-size: clamp(0.8rem, 3.8vw, 1rem);
+            }
+            
+            .song-card .song-info p {
+                font-size: clamp(0.7rem, 3.2vw, 0.85rem);
             }
 
-            .btn {
-                padding: 12px 16px;
-                font-size: 0.9rem;
+            .action-btn {
+                padding: clamp(8px, 2vw, 12px) clamp(12px, 4vw, 20px);
+                font-size: clamp(0.7rem, 3.5vw, 0.9rem);
+                min-height: clamp(32px, 8vw, 40px);
             }
 
             .swipe-instructions {
-                font-size: 0.8rem;
-                padding: 10px;
-                margin: 10px;
+                font-size: clamp(0.7rem, 3vw, 0.8rem);
+                padding: clamp(6px, 2vw, 10px);
+                margin: clamp(6px, 2vw, 10px);
+            }
+            
+            .action-buttons {
+                min-height: clamp(60px, 12vh, 100px);
+                gap: clamp(6px, 2vw, 10px);
+                padding: clamp(6px, 2vw, 12px);
+            }
+        }
+
+        /* Landscape mobile optimizations for rank.html */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .comparison-container {
+                padding: clamp(4px, 1vw, 8px);
+            }
+            
+            .ranking-header {
+                min-height: clamp(40px, 8vh, 60px);
+                padding: clamp(4px, 1vw, 8px);
+            }
+            
+            .song-cards {
+                flex-direction: row;
+                gap: clamp(8px, 2vw, 16px);
+                max-height: 75vh;
+            }
+            
+            .song-card {
+                width: clamp(200px, 40vw, 280px);
+                height: clamp(240px, 50vh, 320px);
+            }
+            
+            .song-card .card-image {
+                height: clamp(120px, 25vh, 160px);
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+                min-height: clamp(40px, 8vh, 60px);
+                gap: clamp(8px, 2vw, 16px);
+            }
+            
+            .action-btn {
+                flex: 1;
+                min-height: clamp(32px, 6vh, 40px);
             }
         }
 
@@ -1058,6 +1195,33 @@
                 background: var(--primary-color); /* Keep consistent button colors */
             }
 
+            /* Final viewport constraints for rank.html */
+            * {
+                max-width: 100vw;
+            }
+            
+            /* Prevent any overflow */
+            .comparison-container * {
+                box-sizing: border-box;
+            }
+            
+            /* Ensure buttons stay in viewport */
+            .preview-controls {
+                max-width: 100%;
+                overflow: hidden;
+            }
+            
+            .preview-btn {
+                min-width: clamp(32px, 8vw, 40px);
+                padding: clamp(4px, 1vw, 8px);
+            }
+            
+            /* Compact progress bars */
+            .preview-progress {
+                height: clamp(2px, 1vw, 4px);
+                margin: clamp(4px, 1vw, 8px) 0;
+            }
+            
             /* Ensure touch feedback is clear */
             .song-card {
                 touch-action: pan-x; /* Allow horizontal panning for swipe */
