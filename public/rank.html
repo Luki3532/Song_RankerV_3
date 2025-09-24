@@ -403,8 +403,8 @@
                     return;
                 }
 
-                // Try the enhanced endpoint first
-                let response = await fetch(`/playlist/${currentPlaylist.id}/tracks-enhanced`, {
+                // Use the search-based endpoint for better preview URL availability
+                let response = await fetch(`/playlist/${currentPlaylist.id}/tracks-with-previews`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -416,7 +416,7 @@
                     
                     // Debug: Log the full structure of the first track to see what fields are available
                     if (songs.length > 0) {
-                        console.log('Enhanced endpoint - Full track object structure:', JSON.stringify(songs[0], null, 2));
+                        console.log('Search-enhanced endpoint - Full track object structure:', JSON.stringify(songs[0], null, 2));
                         console.log('Available fields:', Object.keys(songs[0]));
                     }
                     
@@ -429,10 +429,10 @@
                     }
                     
                     // Show preview availability info
+                    console.log(`Preview availability: ${songsWithPreviews} out of ${songs.length} songs have preview clips available.`);
+                    
                     if (songsWithPreviews === 0) {
                         console.log('Note: No preview clips available for songs in this playlist. You can still rank based on song titles and artists.');
-                    } else {
-                        console.log(`${songsWithPreviews} out of ${songs.length} songs have preview clips available.`);
                     }
                     
                     initializeRanking();

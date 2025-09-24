@@ -240,6 +240,77 @@ app.get('/playlist/:id/tracks-enhanced', async (req, res) => {
     }
 });
 
+// Search-based approach to get tracks with preview URLs (more reliable)
+app.get('/playlist/:id/tracks-with-previews', async (req, res) => {
+    const token = req.headers.authorization;
+    const playlistId = req.params.id;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    try {
+        // First get the playlist tracks
+        const playlistResponse = await axios({
+            method: 'GET',
+            url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        const playlistTracks = playlistResponse.data.items.filter(item => item.track && item.track.name);
+        
+        if (playlistTracks.length === 0) {
+            return res.json({ items: [] });
+        }
+
+        // For each track, search for it to get complete data with preview URLs
+        const enhancedTracks = await Promise.all(
+            playlistTracks.slice(0, 20).map(async (item) => { // Limit to 20 tracks to avoid rate limits
+                try {
+                    const searchQuery = `${item.track.name} artist:${item.track.artists[0].name}`;
+                    const searchResponse = await axios({
+                        method: 'GET',
+                        url: 'https://api.spotify.com/v1/search',
+                        headers: {
+                            'Authorization': token
+                        },
+                        params: {
+                            q: searchQuery,
+                            type: 'track',
+                            limit: 1
+                        }
+                    });
+
+                    if (searchResponse.data.tracks.items.length > 0) {
+                        const searchTrack = searchResponse.data.tracks.items[0];
+                        // Return the search result track which should have preview_url
+                        return {
+                            track: {
+                                ...item.track,
+                                preview_url: searchTrack.preview_url
+                            }
+                        };
+                    }
+                    
+                    return item; // Return original if search fails
+                } catch (searchError) {
+                    console.log('Search failed for track:', item.track.name);
+                    return item; // Return original if search fails
+                }
+            })
+        );
+
+        res.json({ items: enhancedTracks });
+    } catch (error) {
+        res.status(400).json({
+            error: 'Failed to fetch tracks with previews',
+            message: error.message
+        });
+    }
+});
+
 // Utility function to generate random string
 function generateRandomString(length) {
     let result = '';
