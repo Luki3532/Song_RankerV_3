@@ -292,32 +292,56 @@
         
         .preview-controls {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: var(--space-4) 0;
-            gap: var(--space-3);
+            margin: var(--space-3) 0;
+            gap: var(--space-2);
+            padding: var(--space-3);
+            background: var(--spotify-gray-700);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--spotify-gray-600);
+        }
+        
+        .preview-btn-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
         }
         
         .preview-btn {
-            background: var(--spotify-gray-700);
-            border: 1px solid var(--spotify-gray-600);
+            background: var(--spotify-gray-600);
+            border: 1px solid var(--spotify-gray-500);
             color: var(--spotify-white);
-            width: var(--touch-target);
-            height: var(--touch-target);
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius-full);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: var(--font-size-lg);
+            font-size: var(--font-size-base);
             transition: all var(--transition-base);
             touch-action: manipulation;
         }
         
+        .preview-btn-main {
+            width: var(--touch-target);
+            height: var(--touch-target);
+            font-size: var(--font-size-lg);
+            background: var(--spotify-green);
+            border-color: var(--spotify-green-hover);
+        }
+        
         .preview-btn:hover {
-            background: var(--spotify-gray-600);
-            border-color: var(--spotify-gray-500);
+            background: var(--spotify-gray-500);
+            border-color: var(--spotify-gray-400);
             transform: scale(1.05);
+        }
+        
+        .preview-btn-main:hover {
+            background: var(--spotify-green-hover);
+            border-color: #22c55e;
         }
         
         .preview-btn:disabled {
@@ -332,12 +356,101 @@
             animation: pulse 1.5s infinite;
         }
         
+        .preview-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--spotify-gray-600);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-top: var(--space-2);
+        }
+        
+        .preview-progress-bar {
+            height: 100%;
+            background: var(--spotify-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .preview-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-top: var(--space-1);
+            font-size: var(--font-size-xs);
+            color: var(--spotify-gray-400);
+        }
+        
+        .preview-time {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .auto-preview-indicator {
+            background: var(--spotify-green);
+            color: var(--spotify-white);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--space-1);
+            animation: fadeInBounce 0.5s ease-out;
+        }
+        
+        @keyframes fadeInBounce {
+            0% { opacity: 0; transform: translateY(-10px); }
+            50% { opacity: 1; transform: translateY(-2px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
         .no-preview {
             color: var(--spotify-gray-500);
             font-size: var(--font-size-xs);
             text-align: center;
             font-style: italic;
-            padding: var(--space-2);
+            padding: var(--space-3);
+            background: var(--spotify-gray-800);
+            border: 1px dashed var(--spotify-gray-600);
+            border-radius: var(--radius-md);
+        }
+        
+        .preview-shortcuts {
+            position: fixed;
+            bottom: var(--space-4);
+            right: var(--space-4);
+            background: var(--spotify-gray-800);
+            border: 1px solid var(--spotify-gray-600);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+            font-size: var(--font-size-xs);
+            color: var(--spotify-gray-400);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .preview-shortcuts.show {
+            display: block;
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            margin: var(--space-1) 0;
+        }
+        
+        .shortcut-key {
+            color: var(--spotify-white);
+            font-weight: var(--font-weight-medium);
+            background: var(--spotify-gray-700);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+        }
+        
+        @keyframes slideInUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
         
         @keyframes pulse {
@@ -487,6 +600,76 @@
             0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-10px); }
             60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes fadeInBounce {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+        
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.8);
+            }
+        }
+        
+        .auto-preview-indicator {
+            background: var(--spotify-green);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
+            animation: fadeInBounce 0.3s ease-out;
+        }
+        
+        .preview-shortcuts {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(18, 18, 18, 0.95);
+            border: 1px solid var(--spotify-gray-600);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--spotify-white);
+            font-size: 13px;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-xl);
+            display: none;
+            min-width: 180px;
+        }
+        
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 4px 0;
+        }
+        
+        .shortcut-key {
+            background: var(--spotify-gray-700);
+            color: var(--spotify-gray-200);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: 600;
         }
 
         @keyframes eloFloat {
@@ -903,9 +1086,14 @@
         let totalComparisons = 0;
         let eloRatings = new Map();
         
-        // Audio preview variables
+        // Enhanced Audio preview variables
         let currentAudio = null;
         let currentlyPlaying = null;
+        let autoPreviewMode = false;
+        let previewQueue = [];
+        let keyboardListenersActive = true;
+        let currentSongIndex = 0; // 0 for left, 1 for right
+        let progressInterval = null;
         
         // Dynamic ELO rating system
         let INITIAL_ELO = 1200;
@@ -1075,6 +1263,9 @@
 
             displaySongs();
             updateProgress();
+            
+            // Initialize auto-preview if enabled
+            initializeAutoPreview();
         }
 
         function getRandomPair() {
@@ -1216,13 +1407,25 @@
                 ? song.album.images[0].url 
                 : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMjQiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
-            // Create preview controls HTML
+            // Create enhanced preview controls HTML
             const previewControls = song.preview_url 
-                ? `<div class="preview-controls">
-                     <button class="preview-btn" onclick="togglePreview('${song.id}', '${song.preview_url}', this, event)" data-song-id="${song.id}">▶</button>
+                ? `<div class="preview-controls" id="preview-${song.id}">
+                     <div class="preview-btn-row">
+                         <button class="preview-btn" onclick="seekPreview('${song.id}', -10, event)" title="Rewind 10s">⏪</button>
+                         <button class="preview-btn preview-btn-main" onclick="togglePreview('${song.id}', '${song.preview_url}', this, event)" data-song-id="${song.id}" title="Play/Pause">▶</button>
+                         <button class="preview-btn" onclick="seekPreview('${song.id}', 10, event)" title="Forward 10s">⏩</button>
+                         <button class="preview-btn" onclick="toggleAutoPreview(event)" title="Auto-preview mode">🔄</button>
+                     </div>
+                     <div class="preview-progress" onclick="seekToPosition('${song.id}', event)">
+                         <div class="preview-progress-bar" id="progress-${song.id}"></div>
+                     </div>
+                     <div class="preview-info">
+                         <span class="preview-time" id="time-${song.id}">0:00</span>
+                         <span class="preview-time" id="duration-${song.id}">0:30</span>
+                     </div>
                    </div>`
                 : `<div class="preview-controls">
-                     <div class="no-preview">Preview not available</div>
+                     <div class="no-preview">🎵 Preview not available from Spotify</div>
                    </div>`;
 
             card.innerHTML = `
@@ -1519,9 +1722,8 @@
             saveRankings(true);
         }
 
-        // Audio preview functions
+        // Enhanced Audio preview functions
         function togglePreview(songId, previewUrl, button, event) {
-            // Prevent triggering the card click event
             event.stopPropagation();
             
             // If this song is already playing, pause it
@@ -1532,63 +1734,241 @@
             
             // Stop any currently playing audio
             if (currentAudio) {
-                currentAudio.pause();
-                updatePlayButton(currentlyPlaying, false);
+                stopCurrentPreview();
             }
             
             // Start playing the new song
-            playPreview(songId, previewUrl, button);
+            playPreview(songId, previewUrl);
         }
         
-        function playPreview(songId, previewUrl, button) {
-            currentAudio = new Audio(previewUrl);
-            currentlyPlaying = songId;
-            
-            // Update button state
-            updatePlayButton(songId, true);
-            
-            // Set up event listeners
-            currentAudio.addEventListener('ended', () => {
-                updatePlayButton(songId, false);
-                currentlyPlaying = null;
-                currentAudio = null;
-            });
-            
-            currentAudio.addEventListener('error', () => {
-                alert('Could not play preview');
-                updatePlayButton(songId, false);
-                currentlyPlaying = null;
-                currentAudio = null;
-            });
-            
-            // Play the audio
-            currentAudio.play().catch(error => {
-                console.error('Error playing audio:', error);
-                updatePlayButton(songId, false);
-                currentlyPlaying = null;
-                currentAudio = null;
-            });
+        function playPreview(songId, previewUrl) {
+            try {
+                currentAudio = new Audio(previewUrl);
+                currentlyPlaying = songId;
+                
+                // Set volume and playback rate
+                currentAudio.volume = 0.7;
+                currentAudio.playbackRate = 1.0;
+                
+                // Find the most interesting part (skip intro if possible)
+                currentAudio.currentTime = 15; // Start 15 seconds in for most distinctive sound
+                
+                // Update UI
+                updatePlayButton(songId, true);
+                startProgressTracking(songId);
+                
+                // Set up event listeners
+                currentAudio.addEventListener('loadedmetadata', () => {
+                    updateDurationDisplay(songId, currentAudio.duration);
+                });
+                
+                currentAudio.addEventListener('timeupdate', () => {
+                    updateProgressBar(songId, currentAudio.currentTime, currentAudio.duration);
+                });
+                
+                currentAudio.addEventListener('ended', () => {
+                    onPreviewEnded(songId);
+                });
+                
+                currentAudio.addEventListener('error', (e) => {
+                    console.error('Audio error:', e);
+                    onPreviewError(songId);
+                });
+                
+                // Play with fade in effect
+                currentAudio.play().then(() => {
+                    // Success - add visual feedback
+                    showAutoPreviewIndicator(songId);
+                }).catch(error => {
+                    console.error('Playback failed:', error);
+                    onPreviewError(songId);
+                });
+                
+            } catch (error) {
+                console.error('Error creating audio:', error);
+                onPreviewError(songId);
+            }
         }
         
         function pausePreview() {
-            if (currentAudio) {
+            if (currentAudio && currentlyPlaying) {
                 currentAudio.pause();
                 updatePlayButton(currentlyPlaying, false);
+                stopProgressTracking();
+            }
+        }
+        
+        function stopCurrentPreview() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                if (currentlyPlaying) {
+                    updatePlayButton(currentlyPlaying, false);
+                    updateProgressBar(currentlyPlaying, 0, currentAudio.duration || 30);
+                }
+                stopProgressTracking();
                 currentlyPlaying = null;
                 currentAudio = null;
+            }
+        }
+        
+        function seekPreview(songId, seconds, event) {
+            event.stopPropagation();
+            if (currentAudio && currentlyPlaying === songId) {
+                const newTime = Math.max(0, Math.min(currentAudio.duration || 30, currentAudio.currentTime + seconds));
+                currentAudio.currentTime = newTime;
+                updateProgressBar(songId, newTime, currentAudio.duration || 30);
+            }
+        }
+        
+        function seekToPosition(songId, event) {
+            event.stopPropagation();
+            if (currentAudio && currentlyPlaying === songId) {
+                const progressBar = event.currentTarget;
+                const rect = progressBar.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const percentage = clickX / rect.width;
+                const newTime = percentage * (currentAudio.duration || 30);
+                currentAudio.currentTime = newTime;
+            }
+        }
+        
+        function toggleAutoPreview(event) {
+            event.stopPropagation();
+            autoPreviewMode = !autoPreviewMode;
+            
+            // Update all auto-preview buttons
+            document.querySelectorAll('.preview-btn[title="Auto-preview mode"]').forEach(btn => {
+                btn.style.background = autoPreviewMode ? 'var(--spotify-green)' : 'var(--spotify-gray-600)';
+                btn.title = autoPreviewMode ? 'Auto-preview ON' : 'Auto-preview mode';
+            });
+            
+            // Show notification
+            showNotification(autoPreviewMode ? '🔄 Auto-preview enabled' : '⏸️ Auto-preview disabled');
+            
+            // If enabled and no audio playing, start with left song
+            if (autoPreviewMode && !currentlyPlaying && currentPair.left?.preview_url) {
+                setTimeout(() => playPreview(currentPair.left.id, currentPair.left.preview_url), 500);
             }
         }
         
         function updatePlayButton(songId, isPlaying) {
             const button = document.querySelector(`[data-song-id="${songId}"]`);
             if (button) {
-                button.textContent = isPlaying ? '⏸' : '▶';
-                if (isPlaying) {
-                    button.classList.add('playing');
-                } else {
-                    button.classList.remove('playing');
-                }
+                button.textContent = isPlaying ? '⏸️' : '▶';
+                button.classList.toggle('playing', isPlaying);
+                button.title = isPlaying ? 'Pause' : 'Play preview';
             }
+        }
+        
+        function updateProgressBar(songId, currentTime, duration) {
+            const progressBar = document.getElementById(`progress-${songId}`);
+            const timeDisplay = document.getElementById(`time-${songId}`);
+            
+            if (progressBar) {
+                const percentage = (currentTime / duration) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+            
+            if (timeDisplay) {
+                timeDisplay.textContent = formatTime(currentTime);
+            }
+        }
+        
+        function updateDurationDisplay(songId, duration) {
+            const durationDisplay = document.getElementById(`duration-${songId}`);
+            if (durationDisplay) {
+                durationDisplay.textContent = formatTime(duration);
+            }
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function startProgressTracking(songId) {
+            stopProgressTracking(); // Clear any existing interval
+            progressInterval = setInterval(() => {
+                if (currentAudio && currentlyPlaying === songId) {
+                    updateProgressBar(songId, currentAudio.currentTime, currentAudio.duration || 30);
+                }
+            }, 100);
+        }
+        
+        function stopProgressTracking() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+        
+        function onPreviewEnded(songId) {
+            updatePlayButton(songId, false);
+            updateProgressBar(songId, 0, 30);
+            stopProgressTracking();
+            currentlyPlaying = null;
+            currentAudio = null;
+            
+            // Auto-preview the other song if enabled
+            if (autoPreviewMode) {
+                setTimeout(() => {
+                    const otherSong = songId === currentPair.left.id ? currentPair.right : currentPair.left;
+                    if (otherSong?.preview_url) {
+                        playPreview(otherSong.id, otherSong.preview_url);
+                    }
+                }, 1000);
+            }
+        }
+        
+        function onPreviewError(songId) {
+            updatePlayButton(songId, false);
+            updateProgressBar(songId, 0, 30);
+            stopProgressTracking();
+            currentlyPlaying = null;
+            currentAudio = null;
+            showNotification('⚠️ Preview unavailable');
+        }
+        
+        function showAutoPreviewIndicator(songId) {
+            const previewControls = document.getElementById(`preview-${songId}`);
+            if (previewControls && !previewControls.querySelector('.auto-preview-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.className = 'auto-preview-indicator';
+                indicator.textContent = '🎵 Now Playing';
+                previewControls.insertBefore(indicator, previewControls.firstChild);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    if (indicator.parentNode) {
+                        indicator.parentNode.removeChild(indicator);
+                    }
+                }, 3000);
+            }
+        }
+        
+        function showNotification(message) {
+            // Create notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                background: var(--spotify-green); color: white; padding: 12px 24px;
+                border-radius: 24px; font-size: 14px; font-weight: 600;
+                z-index: 10000; animation: fadeInBounce 0.3s ease-out;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 2700);
         }
 
         function goBack() {
@@ -1841,6 +2221,146 @@
                 nextComparison();
             };
         }
+        
+        // Keyboard shortcuts handler
+        function initializeKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Only handle if not typing in an input field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                switch(e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        if (currentlyPlaying) {
+                            pauseCurrentPreview();
+                        } else {
+                            // Play left song by default
+                            const leftSong = currentPair?.left;
+                            if (leftSong?.preview_url) {
+                                playPreview(leftSong.id, leftSong.preview_url);
+                            }
+                        }
+                        break;
+                    
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            // Seek backward 10 seconds
+                            if (currentAudio) {
+                                currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 10);
+                            }
+                        } else {
+                            // Play left song
+                            const leftSong = currentPair?.left;
+                            if (leftSong?.preview_url) {
+                                playPreview(leftSong.id, leftSong.preview_url);
+                            }
+                        }
+                        break;
+                    
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            // Seek forward 10 seconds
+                            if (currentAudio) {
+                                currentAudio.currentTime = Math.min(currentAudio.duration || 30, currentAudio.currentTime + 10);
+                            }
+                        } else {
+                            // Play right song
+                            const rightSong = currentPair?.right;
+                            if (rightSong?.preview_url) {
+                                playPreview(rightSong.id, rightSong.preview_url);
+                            }
+                        }
+                        break;
+                    
+                    case 'KeyA':
+                        e.preventDefault();
+                        toggleAutoPreview();
+                        break;
+                    
+                    case 'KeyH':
+                        e.preventDefault();
+                        toggleShortcutsPanel();
+                        break;
+                    
+                    case 'Escape':
+                        e.preventDefault();
+                        pauseCurrentPreview();
+                        break;
+                }
+            });
+        }
+        
+        function pauseCurrentPreview() {
+            if (currentAudio && currentlyPlaying) {
+                currentAudio.pause();
+                updatePlayButton(currentlyPlaying, false);
+                stopProgressTracking();
+                currentlyPlaying = null;
+                currentAudio = null;
+            }
+        }
+        
+        function toggleAutoPreview() {
+            autoPreviewMode = !autoPreviewMode;
+            const toggleButton = document.getElementById('auto-preview-toggle');
+            if (toggleButton) {
+                toggleButton.classList.toggle('active', autoPreviewMode);
+                toggleButton.textContent = autoPreviewMode ? '🔄 Auto: ON' : '🔄 Auto: OFF';
+            }
+            showNotification(autoPreviewMode ? '🎵 Auto-preview enabled' : '⏸️ Auto-preview disabled');
+        }
+        
+        function toggleShortcutsPanel() {
+            const panel = document.getElementById('shortcuts-panel');
+            if (panel) {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+        
+        // Auto-preview logic for new comparisons
+        function initializeAutoPreview() {
+            if (autoPreviewMode && currentPair) {
+                setTimeout(() => {
+                    const leftSong = currentPair.left;
+                    if (leftSong?.preview_url) {
+                        playPreview(leftSong.id, leftSong.preview_url);
+                        showAutoPreviewIndicator(leftSong.id);
+                    }
+                }, 500); // Brief delay for UI transition
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeKeyboardShortcuts();
+        });
     </script>
+
+    <!-- Keyboard Shortcuts Helper -->
+    <div class="preview-shortcuts" id="shortcuts-panel">
+        <div style="font-weight: 600; margin-bottom: 8px; color: var(--spotify-green);">🎵 Preview Controls</div>
+        <div class="shortcut-item">
+            <span>Play/Pause</span>
+            <span class="shortcut-key">SPACE</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Switch Songs</span>
+            <span class="shortcut-key">← →</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Seek ±10s</span>
+            <span class="shortcut-key">SHIFT + ←→</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Auto-Preview</span>
+            <span class="shortcut-key">A</span>
+        </div>
+        <div class="shortcut-item">
+            <span>Toggle Help</span>
+            <span class="shortcut-key">H</span>
+        </div>
+    </div>
 </body>
 </html>
