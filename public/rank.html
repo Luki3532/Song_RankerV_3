@@ -1082,6 +1082,20 @@
         </div>
         
         <div class="comparison-container">
+            <div class="smart-ranker-indicator" id="smart-ranker-indicator" style="text-align: center; margin-bottom: 10px; display: none;">
+                <div style="display: inline-flex; align-items: center; background: rgba(29, 185, 84, 0.1); border: 1px solid var(--spotify-green); border-radius: 20px; padding: 8px 16px; font-size: 0.85rem; color: var(--spotify-green);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;">
+                        <circle cx="12" cy="12" r="11" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M7 12c0-1.5 1-3 3-3s3 1.5 3 3-1 3-3 3-3-1.5-3-3z" fill="currentColor"/>
+                        <path d="M14 9c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z" fill="currentColor"/>
+                        <path d="M14 15c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z" fill="currentColor"/>
+                        <path d="M4 9c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z" fill="currentColor"/>
+                        <path d="M4 15c0-1 1-2 2-2s2 1 2 2-1 2-2 2-2-1-2-2z" fill="currentColor"/>
+                    </svg>
+                    <span>Smart Ranker Active - Basketball pickup style matching</span>
+                </div>
+            </div>
+            
             <div class="instruction-text" id="instruction-text" style="text-align: center; opacity: 0.7; font-size: 0.9rem; margin-bottom: 15px; display: none;">
                 Choose your preferred song based on the title, artist, and your personal taste
             </div>
@@ -1158,6 +1172,12 @@
         let currentlyPlaying = null;
         let autoPreviewMode = false;
         let previewQueue = [];
+        
+        // Smart Ranker variables (basketball pickup style)
+        let smartRankerEnabled = false;
+        let songMatchHistory = new Map(); // Track which songs have faced each other
+        let songWinRates = new Map(); // Track win percentage for each song
+        let songTierScores = new Map(); // Track tier-based performance scores
         let keyboardListenersActive = true;
         let currentSongIndex = 0; // 0 for left, 1 for right
         let progressInterval = null;
@@ -1236,6 +1256,9 @@
         }
 
         function initializeRanking() {
+            // Load user settings including Smart Ranker preference
+            loadSmartRankerSettings();
+            
             // Calculate dynamic ELO parameters based on playlist size
             calculateDynamicEloParams();
             
@@ -1312,6 +1335,29 @@
             });
         }
 
+        function loadSmartRankerSettings() {
+            const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+            smartRankerEnabled = settings.ranking?.smartRanker || false;
+            
+            // Initialize Smart Ranker data structures for all songs
+            if (smartRankerEnabled) {
+                songs.forEach(song => {
+                    if (!songMatchHistory.has(song.id)) {
+                        songMatchHistory.set(song.id, new Set());
+                    }
+                    if (!songWinRates.has(song.id)) {
+                        songWinRates.set(song.id, { wins: 0, total: 0 });
+                    }
+                    if (!songTierScores.has(song.id)) {
+                        songTierScores.set(song.id, 1000); // Start at neutral ELO level
+                    }
+                });
+                console.log('🏀 Smart Ranker enabled: Basketball pickup style matching activated');
+            } else {
+                console.log('📊 Standard random matching enabled');
+            }
+        }
+
         function nextComparison() {
             if (comparisons >= totalComparisons) {
                 showResults();
@@ -1323,8 +1369,8 @@
                 pausePreview();
             }
 
-            // Select two random songs (could be improved with better pairing algorithm)
-            const indices = getRandomPair();
+            // Select two songs using Smart Ranker or random algorithm
+            const indices = smartRankerEnabled ? getSmartPair() : getRandomPair();
             currentPair.left = songs[indices[0]];
             currentPair.right = songs[indices[1]];
 
@@ -1344,9 +1390,157 @@
             return [index1, index2];
         }
 
+        function getSmartPair() {
+            // Basketball pickup style: best songs rise to the top by facing each other
+            // Algorithm: 
+            // 1. Identify top-tier songs (highest ELO)
+            // 2. Match top songs against each other more frequently
+            // 3. Allow newcomers to challenge established songs
+            // 4. Avoid repeating matchups when possible
+            
+            const songData = songs.map((song, index) => ({
+                index,
+                id: song.id,
+                elo: eloRatings.get(song.id) || 1000,
+                winRate: calculateWinRate(song.id),
+                matchCount: songMatchHistory.get(song.id)?.size || 0
+            }));
+            
+            // Sort by performance (ELO + win rate factor)
+            songData.sort((a, b) => {
+                const scoreA = a.elo + (a.winRate * 100); // Win rate bonus
+                const scoreB = b.elo + (b.winRate * 100);
+                return scoreB - scoreA;
+            });
+            
+            // Define tiers based on performance
+            const topTierSize = Math.max(2, Math.floor(songs.length * 0.25)); // Top 25%
+            const midTierSize = Math.floor(songs.length * 0.5); // Next 50%
+            
+            const topTier = songData.slice(0, topTierSize);
+            const midTier = songData.slice(topTierSize, topTierSize + midTierSize);
+            const bottomTier = songData.slice(topTierSize + midTierSize);
+            
+            let song1Data, song2Data;
+            
+            // Basketball pickup matching logic
+            const rand = Math.random();
+            
+            if (rand < 0.5 && topTier.length >= 2) {
+                // 50% chance: Top tier vs top tier (elite matchups)
+                [song1Data, song2Data] = selectPairFromTier(topTier);
+            } else if (rand < 0.75 && topTier.length >= 1 && midTier.length >= 1) {
+                // 25% chance: Top tier vs mid tier (challengers)
+                song1Data = topTier[Math.floor(Math.random() * topTier.length)];
+                song2Data = midTier[Math.floor(Math.random() * midTier.length)];
+            } else {
+                // 25% chance: Mixed tier matchups (discovery/development)
+                const allSongs = [...topTier, ...midTier, ...bottomTier];
+                [song1Data, song2Data] = selectPairFromTier(allSongs);
+            }
+            
+            return [song1Data.index, song2Data.index];
+        }
+        
+        function selectPairFromTier(tier) {
+            if (tier.length < 2) {
+                // Fallback to random if tier too small
+                return getRandomPairFromArray(tier);
+            }
+            
+            // Try to find a pair that hasn't faced each other recently
+            const maxAttempts = 5;
+            for (let attempt = 0; attempt < maxAttempts; attempt++) {
+                const indices = getRandomPairFromArray(tier);
+                const song1 = tier[indices[0]];
+                const song2 = tier[indices[1]];
+                
+                // Check if these songs have faced each other
+                const song1Matches = songMatchHistory.get(song1.id) || new Set();
+                if (!song1Matches.has(song2.id)) {
+                    return [song1, song2];
+                }
+            }
+            
+            // If all pairs have faced each other, just return random pair
+            return getRandomPairFromArray(tier);
+        }
+        
+        function getRandomPairFromArray(array) {
+            const index1 = Math.floor(Math.random() * array.length);
+            let index2 = Math.floor(Math.random() * array.length);
+            while (index2 === index1 && array.length > 1) {
+                index2 = Math.floor(Math.random() * array.length);
+            }
+            return [array[index1], array[index2]];
+        }
+        
+        function calculateWinRate(songId) {
+            const stats = songWinRates.get(songId);
+            if (!stats || stats.total === 0) return 0.5; // Neutral win rate for new songs
+            return stats.wins / stats.total;
+        }
+        
+        function updateSmartRankerStats(song1Id, song2Id, isSkip = false) {
+            // Record that these songs have faced each other
+            if (!songMatchHistory.has(song1Id)) {
+                songMatchHistory.set(song1Id, new Set());
+            }
+            if (!songMatchHistory.has(song2Id)) {
+                songMatchHistory.set(song2Id, new Set());
+            }
+            
+            songMatchHistory.get(song1Id).add(song2Id);
+            songMatchHistory.get(song2Id).add(song1Id);
+            
+            if (!isSkip) {
+                // Update win/loss statistics (song1Id is winner, song2Id is loser)
+                const winner = songWinRates.get(song1Id) || { wins: 0, total: 0 };
+                const loser = songWinRates.get(song2Id) || { wins: 0, total: 0 };
+                
+                winner.wins++;
+                winner.total++;
+                loser.total++;
+                
+                songWinRates.set(song1Id, winner);
+                songWinRates.set(song2Id, loser);
+                
+                // Update tier scores (basketball-style momentum)
+                const winnerCurrentScore = songTierScores.get(song1Id) || 1000;
+                const loserCurrentScore = songTierScores.get(song2Id) || 1000;
+                
+                // Winners get momentum boost, losers get slight penalty
+                songTierScores.set(song1Id, winnerCurrentScore + 5);
+                songTierScores.set(song2Id, Math.max(800, loserCurrentScore - 2)); // Floor at 800
+            } else {
+                // For skips, just record the matchup without win/loss
+                const song1Stats = songWinRates.get(song1Id) || { wins: 0, total: 0 };
+                const song2Stats = songWinRates.get(song2Id) || { wins: 0, total: 0 };
+                
+                // Minimal impact for skips
+                song1Stats.total += 0.1;
+                song2Stats.total += 0.1;
+                
+                songWinRates.set(song1Id, song1Stats);
+                songWinRates.set(song2Id, song2Stats);
+            }
+        }
+
+        function updateSmartRankerIndicator() {
+            const indicator = document.getElementById('smart-ranker-indicator');
+            if (smartRankerEnabled && indicator) {
+                indicator.style.display = 'block';
+            } else if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+
         function displaySongs() {
             const container = document.getElementById('song-cards');
             container.innerHTML = '';
+            
+            // Update Smart Ranker indicator
+            updateSmartRankerIndicator();
             
             // Left song card
             const leftCard = createSongCard(currentPair.left, 'left');
@@ -1543,6 +1737,11 @@
                 pausePreview();
             }
             
+            // Update Smart Ranker tracking if enabled
+            if (smartRankerEnabled) {
+                updateSmartRankerStats(winner.id, loser.id, false);
+            }
+            
             // Update ELO ratings
             updateELO(winner.id, loser.id);
             
@@ -1677,8 +1876,17 @@
         }
 
         function skipComparison() {
-            // Apply minimal ELO change for skips (uncertainty)
-            updateELO(currentPair.left.id, currentPair.right.id, true);
+            // In Smart Ranker mode, randomize both choices when skipping
+            if (smartRankerEnabled) {
+                updateSmartRankerStats(currentPair.left.id, currentPair.right.id, true);
+                // Force random selection for next comparison to break Smart Ranker pattern
+                smartRankerEnabled = false;
+                updateELO(currentPair.left.id, currentPair.right.id, true);
+                smartRankerEnabled = true; // Re-enable for subsequent comparisons
+            } else {
+                // Apply minimal ELO change for skips (uncertainty)
+                updateELO(currentPair.left.id, currentPair.right.id, true);
+            }
             
             // Visual feedback for skip
             const cards = document.querySelectorAll('.song-card');
@@ -2200,6 +2408,13 @@
                 comparisons: comparisons,
                 totalComparisons: totalComparisons,
                 eloParams: { INITIAL_ELO, K_FACTOR, eloScale },
+                // Smart Ranker data
+                smartRankerData: {
+                    enabled: smartRankerEnabled,
+                    matchHistory: Array.from(songMatchHistory.entries()).map(([id, set]) => [id, Array.from(set)]),
+                    winRates: Array.from(songWinRates.entries()),
+                    tierScores: Array.from(songTierScores.entries())
+                },
                 isComplete: isComplete,
                 lastUpdated: Date.now()
             };
@@ -2230,6 +2445,22 @@
                         INITIAL_ELO = data.eloParams.INITIAL_ELO;
                         K_FACTOR = data.eloParams.K_FACTOR;
                         eloScale = data.eloParams.eloScale;
+                    }
+                    // Load Smart Ranker data if available
+                    if (data.smartRankerData) {
+                        // Restore match history (convert arrays back to Sets)
+                        if (data.smartRankerData.matchHistory) {
+                            songMatchHistory = new Map(
+                                data.smartRankerData.matchHistory.map(([id, arr]) => [id, new Set(arr)])
+                            );
+                        }
+                        // Restore win rates and tier scores
+                        if (data.smartRankerData.winRates) {
+                            songWinRates = new Map(data.smartRankerData.winRates);
+                        }
+                        if (data.smartRankerData.tierScores) {
+                            songTierScores = new Map(data.smartRankerData.tierScores);
+                        }
                     }
                     
                     return data;

@@ -2635,7 +2635,13 @@
                     </div>
                     <div class="settings-sections">
                         <div class="settings-section">
-                            <h3>🎵 Audio Settings</h3>
+                            <h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 8px;">
+                                    <path d="M9 18V5L12.5 2.5L16 5V18L12.5 15.5L9 18Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 9H5.5C4.11929 9 3 10.1193 3 11.5V13.5C3 14.8807 4.11929 16 5.5 16H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Audio Settings
+                            </h3>
                             <div class="setting-item">
                                 <label>Background Music</label>
                                 <div class="setting-control">
@@ -2663,7 +2669,14 @@
                         </div>
                         
                         <div class="settings-section">
-                            <h3>🎨 Appearance</h3>
+                            <h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 8px;">
+                                    <path d="M12 2.69C15.39 2.69 18.34 4.19 20.38 6.56L17.19 9.75C15.93 8.45 14.08 7.69 12 7.69C9.92 7.69 8.07 8.45 6.81 9.75L3.62 6.56C5.66 4.19 8.61 2.69 12 2.69Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M17 17C15.5 18.5 13.5 19.5 12 19.5S8.5 18.5 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Appearance
+                            </h3>
                             <div class="setting-item">
                                 <label>Theme</label>
                                 <select id="theme-select" onchange="changeTheme(this.value)">
@@ -2691,7 +2704,14 @@
                         </div>
                         
                         <div class="settings-section">
-                            <h3>📊 Ranking Preferences</h3>
+                            <h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 8px;">
+                                    <path d="M3 3V21L9 15L15 21L21 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 8H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 12H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Ranking Preferences
+                            </h3>
                             <div class="setting-item">
                                 <label>Comparison Mode</label>
                                 <select id="comparison-mode" onchange="setComparisonMode(this.value)">
@@ -2714,10 +2734,27 @@
                                     <span class="slider"></span>
                                 </div>
                             </div>
+                            <div class="setting-item smart-ranker-item">
+                                <label>
+                                    Smart Ranker Mode
+                                    <span class="setting-description">Basketball pickup style - best songs rise to the top automatically</span>
+                                </label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="smart-ranker-enabled" onchange="toggleSmartRanker()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="settings-section">
-                            <h3>🔐 Privacy & Data</h3>
+                            <h3>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="vertical-align: middle; margin-right: 8px;">
+                                    <rect x="3" y="11" width="18" height="10" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Privacy & Data
+                            </h3>
                             <div class="setting-item">
                                 <label>Save Ranking History</label>
                                 <div class="setting-control">
@@ -2770,6 +2807,7 @@
             document.getElementById('comparison-mode').value = settings.ranking?.comparisonMode || 'tinder';
             document.getElementById('autosave-enabled').checked = settings.ranking?.autosave !== false;
             document.getElementById('progress-bar-enabled').checked = settings.ranking?.showProgress !== false;
+            document.getElementById('smart-ranker-enabled').checked = settings.ranking?.smartRanker || false;
             
             // Load privacy settings
             document.getElementById('save-history').checked = settings.privacy?.saveHistory !== false;
@@ -2794,7 +2832,8 @@
                 ranking: {
                     comparisonMode: document.getElementById('comparison-mode').value,
                     autosave: document.getElementById('autosave-enabled').checked,
-                    showProgress: document.getElementById('progress-bar-enabled').checked
+                    showProgress: document.getElementById('progress-bar-enabled').checked,
+                    smartRanker: document.getElementById('smart-ranker-enabled').checked
                 },
                 privacy: {
                     saveHistory: document.getElementById('save-history').checked,
