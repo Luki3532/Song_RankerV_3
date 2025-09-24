@@ -2133,9 +2133,14 @@
             setupFilterChips();
         };
 
-        async function initializeApp() {
+        async function fetchUserData() {
             try {
-                console.log('Initializing app with token:', userToken ? 'Token exists' : 'No token');
+                console.log('Fetching user data with token:', userToken ? 'Token exists' : 'No token');
+                
+                if (!userToken) {
+                    console.error('No token available for fetchUserData');
+                    return false;
+                }
                 
                 // Get user profile
                 const userResponse = await fetch('/me', {
@@ -2150,16 +2155,45 @@
                     currentUser = await userResponse.json();
                     console.log('User profile loaded:', currentUser);
                     updateUserProfile();
-                    // Hide auth section and show playlist section after successful login
-                    document.getElementById('auth-section').style.display = 'none';
-                    const playlistSection = document.getElementById('playlist-section');
-                    playlistSection.style.display = 'block';
-                    playlistSection.classList.add('show');
-                    loadPlaylists();
+                    return true;
                 } else {
                     console.error('User profile request failed:', userResponse.status, userResponse.statusText);
                     // Token might be expired
                     localStorage.removeItem('spotify_token');
+                    userToken = null;
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                return false;
+            }
+        }
+
+        async function initializeApp() {
+            try {
+                console.log('Initializing app with token:', userToken ? 'Token exists' : 'No token');
+                
+                // Always initialize app settings first
+                initializeAppSettings();
+                
+                if (userToken) {
+                    const success = await fetchUserData();
+                    
+                    if (success) {
+                        // Hide auth section and show playlist section after successful login
+                        document.getElementById('auth-section').style.display = 'none';
+                        const playlistSection = document.getElementById('playlist-section');
+                        playlistSection.style.display = 'block';
+                        playlistSection.classList.add('show');
+                        loadPlaylists();
+                    } else {
+                        console.error('Failed to initialize app - user data fetch failed');
+                        // Token might be expired
+                        localStorage.removeItem('spotify_token');
+                        showAuthSection();
+                    }
+                } else {
+                    console.log('No token available, showing auth section');
                     showAuthSection();
                 }
             } catch (error) {
@@ -2364,7 +2398,7 @@
             overlay.classList.remove('show');
         }
         
-        function showMyPlaylists() {
+        async function showMyPlaylists() {
             console.log('showMyPlaylists called. userToken:', !!userToken, 'currentUser:', !!currentUser);
             
             // Check if user is authenticated
@@ -2388,7 +2422,14 @@
                 loadPlaylists();
             } else {
                 console.log('User token exists but user data not loaded, fetching user data first');
-                fetchUserData();
+                const success = await fetchUserData();
+                if (success) {
+                    loadPlaylists();
+                } else {
+                    showToast('Failed to load user data. Please try signing in again.');
+                    document.getElementById('playlist-section').style.display = 'none';
+                    document.getElementById('auth-section').style.display = 'block';
+                }
             }
         }
 
@@ -2965,6 +3006,7 @@
         window.showMyPlaylists = showMyPlaylists;
         window.loadPlaylists = loadPlaylists;
         window.displayPlaylists = displayPlaylists;
+        window.fetchUserData = fetchUserData;
 
         // Utility Functions
         function showToast(message) {
@@ -2993,8 +3035,8 @@
             }, 3000);
         }
 
-        // Initialize application settings
-        function initializeApp() {
+        // Initialize application settings  
+        function initializeAppSettings() {
             // Load saved user settings
             const savedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
             
@@ -3015,11 +3057,20 @@
             const token = localStorage.getItem('spotify_token');
             if (token) {
                 userToken = token;
-                fetchUserData();
+                initializeApp();
+            } else {
+                // Initialize app settings even without token
+                const savedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+                if (Object.keys(savedSettings).length > 0) {
+                    applySettings(savedSettings);
+                }
+                
+                // Initialize background music player if enabled
+                if (savedSettings.backgroundMusic?.enabled) {
+                    const player = createBackgroundMusicPlayer();
+                    player.style.display = 'block';
+                }
             }
-            
-            // Initialize app settings
-            initializeApp();
             
             // Add keyboard shortcuts
             document.addEventListener('keydown', function(e) {
