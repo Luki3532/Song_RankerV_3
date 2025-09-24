@@ -1680,21 +1680,31 @@
         }
 
         function displayPlaylists() {
+            console.log('displayPlaylists called with allPlaylists:', allPlaylists);
             document.getElementById('playlists-loading').style.display = 'none';
             const grid = document.getElementById('playlist-grid');
             grid.innerHTML = '';
 
             const filteredPlaylists = filterPlaylists(allPlaylists);
+            console.log('Filtered playlists:', filteredPlaylists);
+            console.log('Current filter:', currentFilter);
 
             if (filteredPlaylists.length === 0) {
+                console.log('No playlists to display');
                 grid.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 40px 0;">No playlists found for this filter</p>';
                 return;
             }
 
-            filteredPlaylists.forEach(playlist => {
-                if (playlist.tracks.total > 1) { // Need at least 2 songs to rank
+            filteredPlaylists.forEach((playlist, index) => {
+                console.log(`Processing playlist ${index}:`, playlist);
+                console.log(`Playlist tracks total:`, playlist.tracks?.total);
+                
+                if (playlist.tracks && playlist.tracks.total > 1) { // Need at least 2 songs to rank
+                    console.log(`Creating card for playlist: ${playlist.name}`);
                     const card = createPlaylistCard(playlist);
                     grid.appendChild(card);
+                } else {
+                    console.log(`Skipping playlist ${playlist.name} - not enough tracks (${playlist.tracks?.total || 0})`);
                 }
             });
         }
