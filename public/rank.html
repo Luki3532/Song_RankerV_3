@@ -337,7 +337,12 @@
         </div>
         
         <div class="comparison-container">
-            <div class="instruction-text" id="instruction-text" style="text-align: center; opacity: 0.7; font-size: 0.9rem; margin-bottom: 15px; display: none;">
+            <div id="preview-banner" style="display:none; text-align:center; margin:10px 15px 0;">
+                <span style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; display:inline-block;">
+                    Preview availability: <strong id="preview-count">0</strong>/<strong id="song-count">0</strong>
+                </span>
+            </div>
+            <div class="instruction-text" id="instruction-text" style="text-align: center; opacity: 0.7; font-size: 0.9rem; margin: 8px 15px 15px; display: none;">
                 Choose your preferred song based on the title, artist, and your personal taste
             </div>
             
@@ -430,6 +435,12 @@
                     
                     // Show preview availability info
                     console.log(`Preview availability: ${songsWithPreviews} out of ${songs.length} songs have preview clips available.`);
+                    const banner = document.getElementById('preview-banner');
+                    const pc = document.getElementById('preview-count');
+                    const sc = document.getElementById('song-count');
+                    pc.textContent = songsWithPreviews;
+                    sc.textContent = songs.length;
+                    banner.style.display = 'block';
                     
                     if (songsWithPreviews === 0) {
                         console.log('Note: No preview clips available for songs in this playlist. You can still rank based on song titles and artists.');
@@ -519,10 +530,10 @@
                 : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMjQiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
             // Create preview controls HTML
-            const previewControls = song.preview_url 
-                ? `<div class="preview-controls">
-                     <button class="preview-btn" onclick="togglePreview('${song.id}', '${song.preview_url}', this, event)" data-song-id="${song.id}">▶</button>
-                   </div>`
+                        const previewControls = song.preview_url 
+                                ? `<div class="preview-controls">
+                                         <button class="preview-btn" data-action="toggle-preview" data-song-id="${song.id}" data-preview-url="${song.preview_url}">▶</button>
+                                     </div>`
                 : `<div class="preview-controls">
                      <div class="no-preview">Preview not available</div>
                    </div>`;
@@ -617,25 +628,24 @@
         }
 
         // Audio preview functions
-        function togglePreview(songId, previewUrl, button, event) {
-            // Prevent triggering the card click event
-            event.stopPropagation();
-            
-            // If this song is already playing, pause it
+        // Event delegation for preview buttons
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.preview-btn[data-action="toggle-preview"]');
+            if (!btn) return;
+            e.stopPropagation();
+            const songId = btn.getAttribute('data-song-id');
+            const previewUrl = btn.getAttribute('data-preview-url');
+            if (!previewUrl) return;
             if (currentlyPlaying === songId) {
                 pausePreview();
                 return;
             }
-            
-            // Stop any currently playing audio
             if (currentAudio) {
                 currentAudio.pause();
                 updatePlayButton(currentlyPlaying, false);
             }
-            
-            // Start playing the new song
-            playPreview(songId, previewUrl, button);
-        }
+            playPreview(songId, previewUrl, btn);
+        });
         
         function playPreview(songId, previewUrl, button) {
             currentAudio = new Audio(previewUrl);
