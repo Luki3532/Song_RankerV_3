@@ -200,16 +200,22 @@
         }
         
         .hamburger-menu {
-            background: var(--glass-white);
-            border: 1px solid var(--glass-white-strong);
+            background: rgba(40, 40, 40, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.15);
             color: white;
-            font-size: 1.25rem;
             cursor: pointer;
-            padding: var(--space-3);
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
+            padding: 15px;
+            border-radius: 15px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 54px;
+            height: 54px;
         }
         
         .hamburger-menu::before {
@@ -219,8 +225,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left var(--transition-base);
+            background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.3), transparent);
+            transition: left 0.6s ease;
         }
         
         .hamburger-menu:hover::before {
@@ -228,13 +234,25 @@
         }
         
         .hamburger-menu:hover {
-            background: var(--glass-white-strong);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+            background: rgba(29, 185, 84, 0.1);
+            border-color: rgba(29, 185, 84, 0.5);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 40px rgba(29, 185, 84, 0.25), 0 8px 32px rgba(0, 0, 0, 0.3);
         }
         
         .hamburger-menu:active {
-            transform: translateY(0);
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.2);
+        }
+
+        .hamburger-menu svg {
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .hamburger-menu:hover svg {
+            transform: rotate(90deg);
+            stroke: #1db954;
         }
         
         .app-title-mobile {
@@ -1598,12 +1616,324 @@
                 transform: none;
             }
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, rgba(40, 40, 40, 0.95) 0%, rgba(30, 30, 30, 0.98) 100%);
+            border-radius: 20px;
+            padding: 0;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 30px 30px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .settings-sections {
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .settings-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .settings-section h3 {
+            color: #ffffff;
+            margin: 0 0 20px 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item label {
+            color: #ffffff;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .setting-control {
+            position: relative;
+            width: 50px;
+            height: 25px;
+        }
+
+        .setting-control input[type="checkbox"] {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+            border-radius: 25px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 19px;
+            width: 19px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #1db954;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(25px);
+        }
+
+        .setting-item input[type="range"] {
+            width: 150px;
+            margin: 0 10px;
+            accent-color: #1db954;
+        }
+
+        .setting-item select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: white;
+            min-width: 120px;
+        }
+
+        .setting-item select option {
+            background: #2a2a2a;
+            color: white;
+        }
+
+        .setting-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .modal-footer {
+            padding: 20px 30px 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1db954, #1ed760);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1ed760, #1db954);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(231, 76, 60, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1db954;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Theme Variations */
+        .theme-light {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --card-bg: #f8f9fa;
+        }
+
+        .theme-spotify {
+            --primary-color: #1db954;
+            --bg-gradient: linear-gradient(135deg, #191414, #1db954);
+        }
+
+        /* Mobile Modal Responsiveness */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 20px;
+                max-height: 85vh;
+            }
+
+            .settings-sections {
+                padding: 15px 20px;
+                gap: 20px;
+            }
+
+            .settings-section {
+                padding: 20px 15px;
+            }
+
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .setting-item input[type="range"] {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-danger {
+                max-width: none;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- Mobile Header -->
     <div class="mobile-header">
-        <button class="hamburger-menu" onclick="toggleMenu()">☰</button>
+        <button class="hamburger-menu" onclick="toggleMenu()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 12H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
         <div class="app-title-mobile">Song Ranker</div>
         <img id="header-profile" class="header-profile" src="" alt="Profile" onclick="toggleMenu()" onerror="this.style.display='none'">
     </div>
@@ -1623,19 +1953,77 @@
         </div>
         <div class="menu-items">
             <a href="#" class="menu-item" onclick="closeMenu()">
-                <span class="icon">🏠</span>
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Home</span>
             </a>
+            <a href="#" class="menu-item" onclick="showMyPlaylists(); closeMenu()">
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18V5L21 3V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="18" cy="16" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </span>
+                <span>My Playlists</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showRankingHistory(); closeMenu()">
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M3 3V21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 9L12 6L16 10L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span>Ranking History</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showFavorites(); closeMenu()">
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M20.84 4.61A5.5 5.5 0 0 0 16 2A5.5 5.5 0 0 0 12 4.61A5.5 5.5 0 0 0 8 2A5.5 5.5 0 0 0 3.16 4.61C1.33 6.44 1.33 9.56 3.16 11.39L12 20.23L20.84 11.39C22.67 9.56 22.67 6.44 20.84 4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span>Favorites</span>
+            </a>
+            <a href="#" class="menu-item" onclick="showProfile(); closeMenu()">
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </span>
+                <span>Profile</span>
+            </a>
             <a href="#" class="menu-item" onclick="showSettings(); closeMenu()">
-                <span class="icon">⚙️</span>
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M19.4 15A1.65 1.65 0 0 0 20.25 13.38A1.65 1.65 0 0 0 19.4 11.63L18.36 10.5A1.65 1.65 0 0 1 18.36 8.14L19.4 7A1.65 1.65 0 0 0 20.25 5.38A1.65 1.65 0 0 0 19.4 3.63L18.36 2.5A1.65 1.65 0 0 0 15.86 2.5L14.14 3.63A1.65 1.65 0 0 0 12.38 4.75A1.65 1.65 0 0 0 10.62 3.63L8.86 2.5A1.65 1.65 0 0 0 6.36 2.5L5.32 3.63A1.65 1.65 0 0 0 4.57 5.38A1.65 1.65 0 0 0 5.32 7L6.36 8.14A1.65 1.65 0 0 1 6.36 10.5L5.32 11.63A1.65 1.65 0 0 0 4.57 13.38A1.65 1.65 0 0 0 5.32 15L6.36 16.14A1.65 1.65 0 0 1 6.36 18.5L5.32 19.63A1.65 1.65 0 0 0 4.57 21.38A1.65 1.65 0 0 0 5.32 23L6.36 24.14A1.65 1.65 0 0 0 8.86 24.14L10.62 23A1.65 1.65 0 0 0 12.38 21.88A1.65 1.65 0 0 0 14.14 23L15.86 24.14A1.65 1.65 0 0 0 18.36 24.14L19.4 23A1.65 1.65 0 0 0 20.25 21.38A1.65 1.65 0 0 0 19.4 19.63L18.36 18.5A1.65 1.65 0 0 1 18.36 16.14L19.4 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Settings</span>
             </a>
             <a href="coming-soon.html" class="menu-item">
-                <span class="icon">🚀</span>
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M4.5 16.5C3 15 3 12.5 3 9.5C3 6.5 3 4 4.5 2.5S8.5 1 11.5 1S17 1 18.5 2.5S20 6.5 20 9.5C20 12.5 20 15 18.5 16.5L12 23L4.5 16.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 9L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 9L9 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Coming Soon</span>
             </a>
             <a href="#" class="menu-item" onclick="logout()">
-                <span class="icon">🚪</span>
+                <span class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
                 <span>Logout</span>
             </a>
         </div>
@@ -1942,14 +2330,37 @@
             overlay.classList.remove('show');
         }
         
-        function showSettings() {
-            alert('Settings page coming soon! Use the filter button to customize playlist display.');
+        function showMyPlaylists() {
+            // Navigate to playlists section (main functionality)
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('playlist-section').style.display = 'block';
+            console.log('Showing playlists section');
         }
-        
+
+        function showRankingHistory() {
+            const historyModal = document.getElementById('ranking-history-modal') || createRankingHistoryModal();
+            historyModal.style.display = 'flex';
+            loadRankingHistory();
+        }
+
+        function showFavorites() {
+            const favoritesModal = document.getElementById('favorites-modal') || createFavoritesModal();
+            favoritesModal.style.display = 'flex';
+            loadFavorites();
+        }
+
         function showProfile() {
             if (currentUser) {
-                alert(`Profile: ${currentUser.display_name || currentUser.id}\nFollowers: ${currentUser.followers?.total || 0}\nCountry: ${currentUser.country || 'Unknown'}`);
+                const profileModal = document.getElementById('profile-modal') || createProfileModal();
+                profileModal.style.display = 'flex';
+                loadProfileData();
             }
+        }
+
+        function showSettings() {
+            const settingsModal = document.getElementById('settings-modal') || createSettingsModal();
+            settingsModal.style.display = 'flex';
+            loadUserSettings();
         }
 
         function createPlaylistCard(playlist) {
@@ -2009,6 +2420,547 @@
             }
             return null;
         }
+
+        // Modal Creation Functions
+        function createRankingHistoryModal() {
+            const modal = document.createElement('div');
+            modal.id = 'ranking-history-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>🏆 Ranking History</h2>
+                        <button class="close-modal" onclick="closeModal('ranking-history-modal')">&times;</button>
+                    </div>
+                    <div id="history-content" style="padding: 20px 30px;">
+                        <div class="loading">Loading your ranking history...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        function createFavoritesModal() {
+            const modal = document.createElement('div');
+            modal.id = 'favorites-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>❤️ My Favorites</h2>
+                        <button class="close-modal" onclick="closeModal('favorites-modal')">&times;</button>
+                    </div>
+                    <div id="favorites-content" style="padding: 20px 30px;">
+                        <div class="loading">Loading your favorite songs...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        function createProfileModal() {
+            const modal = document.createElement('div');
+            modal.id = 'profile-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>👤 My Profile</h2>
+                        <button class="close-modal" onclick="closeModal('profile-modal')">&times;</button>
+                    </div>
+                    <div id="profile-content" style="padding: 20px 30px;">
+                        <div class="loading">Loading your profile...</div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        // Modal Data Loading Functions
+        function loadRankingHistory() {
+            const historyContent = document.getElementById('history-content');
+            const savedRankings = Object.keys(localStorage).filter(key => key.startsWith('ranking_')).map(key => {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch (e) {
+                    return null;
+                }
+            }).filter(Boolean);
+
+            if (savedRankings.length === 0) {
+                historyContent.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7);">No ranking history found. Start ranking some playlists!</p>';
+            } else {
+                historyContent.innerHTML = savedRankings.map(ranking => `
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; margin: 10px 0; border-radius: 10px;">
+                        <h4 style="color: #1db954; margin: 0 0 10px 0;">${ranking.playlistName || 'Unknown Playlist'}</h4>
+                        <p style="color: rgba(255,255,255,0.8); margin: 5px 0;">Progress: ${ranking.comparisons || 0}/${ranking.totalComparisons || 0} comparisons</p>
+                        <p style="color: rgba(255,255,255,0.6); margin: 5px 0; font-size: 0.9rem;">Last updated: ${new Date(ranking.lastUpdated || Date.now()).toLocaleDateString()}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadFavorites() {
+            const favoritesContent = document.getElementById('favorites-content');
+            // This would integrate with your ranking results to show top-rated songs
+            favoritesContent.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7);">Favorites feature coming soon! Complete some rankings to see your top songs here.</p>';
+        }
+
+        function loadProfileData() {
+            const profileContent = document.getElementById('profile-content');
+            if (currentUser) {
+                profileContent.innerHTML = `
+                    <div style="text-align: center;">
+                        <img src="${currentUser.images?.[0]?.url || './blank-profile.png'}" 
+                             style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 20px;">
+                        <h3 style="color: #ffffff; margin: 10px 0;">${currentUser.display_name || currentUser.id}</h3>
+                        <p style="color: rgba(255,255,255,0.7);">Followers: ${currentUser.followers?.total || 0}</p>
+                        <p style="color: rgba(255,255,255,0.7);">Country: ${currentUser.country || 'Unknown'}</p>
+                        <p style="color: rgba(255,255,255,0.7);">Subscription: ${currentUser.product || 'Free'}</p>
+                        ${currentUser.external_urls?.spotify ? `<a href="${currentUser.external_urls.spotify}" target="_blank" style="color: #1db954; text-decoration: none;">View on Spotify</a>` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        // Settings System
+        function createSettingsModal() {
+            const modal = document.createElement('div');
+            modal.id = 'settings-modal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content settings-modal-content">
+                    <div class="modal-header">
+                        <h2>Settings</h2>
+                        <button class="close-modal" onclick="closeModal('settings-modal')">&times;</button>
+                    </div>
+                    <div class="settings-sections">
+                        <div class="settings-section">
+                            <h3>🎵 Audio Settings</h3>
+                            <div class="setting-item">
+                                <label>Background Music</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="bg-music-enabled" onchange="toggleBackgroundMusic()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>Background Music Volume</label>
+                                <input type="range" id="bg-music-volume" min="0" max="100" value="50" onchange="setBackgroundVolume(this.value)">
+                                <span id="volume-value">50%</span>
+                            </div>
+                            <div class="setting-item">
+                                <label>Preview Volume</label>
+                                <input type="range" id="preview-volume" min="0" max="100" value="70" onchange="setPreviewVolume(this.value)">
+                                <span id="preview-volume-value">70%</span>
+                            </div>
+                            <div class="setting-item">
+                                <label>Auto-play Previews</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="autoplay-previews" checked onchange="toggleAutoplayPreviews()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>🎨 Appearance</h3>
+                            <div class="setting-item">
+                                <label>Theme</label>
+                                <select id="theme-select" onchange="changeTheme(this.value)">
+                                    <option value="dark">Dark Mode</option>
+                                    <option value="light">Light Mode</option>
+                                    <option value="auto">Auto (System)</option>
+                                    <option value="spotify">Spotify Green</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>Animation Effects</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="animations-enabled" checked onchange="toggleAnimations()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>Playlist Card Size</label>
+                                <select id="card-size" onchange="changeCardSize(this.value)">
+                                    <option value="small">Small</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="large">Large</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>📊 Ranking Preferences</h3>
+                            <div class="setting-item">
+                                <label>Comparison Mode</label>
+                                <select id="comparison-mode" onchange="setComparisonMode(this.value)">
+                                    <option value="tinder">Tinder Style</option>
+                                    <option value="side-by-side">Side by Side</option>
+                                    <option value="bracket">Tournament Bracket</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>Auto-save Progress</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="autosave-enabled" checked onchange="toggleAutosave()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>Show Progress Bar</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="progress-bar-enabled" checked onchange="toggleProgressBar()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-section">
+                            <h3>🔐 Privacy & Data</h3>
+                            <div class="setting-item">
+                                <label>Save Ranking History</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="save-history" checked onchange="toggleSaveHistory()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>Analytics</label>
+                                <div class="setting-control">
+                                    <input type="checkbox" id="analytics-enabled" onchange="toggleAnalytics()">
+                                    <span class="slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-actions">
+                                <button class="btn-secondary" onclick="exportUserData()">Export My Data</button>
+                                <button class="btn-danger" onclick="clearAllData()">Clear All Data</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button class="btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+                        <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            return modal;
+        }
+
+        // Settings Functions
+        function loadUserSettings() {
+            const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+            
+            // Load audio settings
+            document.getElementById('bg-music-enabled').checked = settings.backgroundMusic?.enabled || false;
+            document.getElementById('bg-music-volume').value = settings.backgroundMusic?.volume || 50;
+            document.getElementById('volume-value').textContent = (settings.backgroundMusic?.volume || 50) + '%';
+            document.getElementById('preview-volume').value = settings.audio?.previewVolume || 70;
+            document.getElementById('preview-volume-value').textContent = (settings.audio?.previewVolume || 70) + '%';
+            document.getElementById('autoplay-previews').checked = settings.audio?.autoplay !== false;
+            
+            // Load appearance settings
+            document.getElementById('theme-select').value = settings.appearance?.theme || 'dark';
+            document.getElementById('animations-enabled').checked = settings.appearance?.animations !== false;
+            document.getElementById('card-size').value = settings.appearance?.cardSize || 'medium';
+            
+            // Load ranking settings
+            document.getElementById('comparison-mode').value = settings.ranking?.comparisonMode || 'tinder';
+            document.getElementById('autosave-enabled').checked = settings.ranking?.autosave !== false;
+            document.getElementById('progress-bar-enabled').checked = settings.ranking?.showProgress !== false;
+            
+            // Load privacy settings
+            document.getElementById('save-history').checked = settings.privacy?.saveHistory !== false;
+            document.getElementById('analytics-enabled').checked = settings.privacy?.analytics || false;
+        }
+
+        function saveSettings() {
+            const settings = {
+                backgroundMusic: {
+                    enabled: document.getElementById('bg-music-enabled').checked,
+                    volume: parseInt(document.getElementById('bg-music-volume').value)
+                },
+                audio: {
+                    previewVolume: parseInt(document.getElementById('preview-volume').value),
+                    autoplay: document.getElementById('autoplay-previews').checked
+                },
+                appearance: {
+                    theme: document.getElementById('theme-select').value,
+                    animations: document.getElementById('animations-enabled').checked,
+                    cardSize: document.getElementById('card-size').value
+                },
+                ranking: {
+                    comparisonMode: document.getElementById('comparison-mode').value,
+                    autosave: document.getElementById('autosave-enabled').checked,
+                    showProgress: document.getElementById('progress-bar-enabled').checked
+                },
+                privacy: {
+                    saveHistory: document.getElementById('save-history').checked,
+                    analytics: document.getElementById('analytics-enabled').checked
+                }
+            };
+            
+            localStorage.setItem('userSettings', JSON.stringify(settings));
+            applySettings(settings);
+            showToast('Settings saved successfully!');
+            closeModal('settings-modal');
+        }
+
+        function applySettings(settings) {
+            // Apply theme
+            document.body.className = `theme-${settings.appearance.theme}`;
+            
+            // Apply card size
+            document.documentElement.style.setProperty('--card-size', 
+                settings.appearance.cardSize === 'small' ? '180px' :
+                settings.appearance.cardSize === 'large' ? '280px' : '230px'
+            );
+            
+            // Apply animations
+            if (!settings.appearance.animations) {
+                document.documentElement.style.setProperty('--animation-duration', '0s');
+            } else {
+                document.documentElement.style.setProperty('--animation-duration', '0.3s');
+            }
+            
+            // Background music setup
+            if (settings.backgroundMusic.enabled) {
+                initializeBackgroundMusic();
+            }
+        }
+
+        // Background Music System
+        let backgroundAudio = null;
+        let currentTrackIndex = 0;
+        let backgroundMusicTracks = [
+            {
+                name: "Chill Lo-Fi Beats",
+                url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1uGkeAjiS2fPPfjEGIXLB7tqTQAoUXrTp66hVFApGoOL1t2gfAjaP1vLMdCMHJnZC7tqWQAkUXrTq66lWFApGoOL1t2gfAjaP1vLNdSMHJnhC7dmVPwkUXrTq66lWFAlFnuD1uWkgAzaP1fHNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfATiO1vDNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlGn+L2t2kfAjuO1vDNdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPw==", // Silent track placeholder
+                duration: 300
+            },
+            {
+                name: "Focus Ambient",
+                url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1uGkeAjiS2fPPfjEGIXLB7tqTQAoUXrTp66hVFApGoOL1t2gfAjaP1vLMdCMHJnZC7tqWQAkUXrTq66lWFApGoOL1t2gfAjaP1vLNdSMHJnhC7dmVPwkUXrTq66lWFAlFnuD1uWkgAzaP1fHNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfATiO1vDNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlGn+L2t2kfAjuO1vDNdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPw==", // Silent track placeholder
+                duration: 240
+            },
+            {
+                name: "Soft Piano",
+                url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+H1uGkeAjiS2fPPfjEGIXLB7tqTQAoUXrTp66hVFApGoOL1t2gfAjaP1vLMdCMHJnZC7tqWQAkUXrTq66lWFApGoOL1t2gfAjaP1vLNdSMHJnhC7dmVPwkUXrTq66lWFAlFnuD1uWkgAzaP1fHNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfATiO1vDNdSQJJnhD7dmUPgkUXrPq66lWFAlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlFnuH2uGkfAjuO1vDNdSQJJnhC7tiUPgkUXrTq66pXFQlGn+L2t2kfAjuO1vDNdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSQJJnhC7tmUPwkUXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7dmVPwkUXrTp66lXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPwkTXrTp66pXFQlGn+L2t2kfAjuO1vDMdSMIJ3hD7tmVPw==", // Silent track placeholder
+                duration: 180
+            }
+        ];
+
+        function initializeBackgroundMusic() {
+            if (!backgroundAudio) {
+                backgroundAudio = new Audio();
+                backgroundAudio.loop = false; // We'll handle looping manually for track rotation
+                backgroundAudio.volume = (JSON.parse(localStorage.getItem('userSettings') || '{}').backgroundMusic?.volume || 50) / 100;
+                
+                // Add event listener for when track ends
+                backgroundAudio.addEventListener('ended', playNextBackgroundTrack);
+                backgroundAudio.addEventListener('error', handleBackgroundMusicError);
+            }
+        }
+
+        function playNextBackgroundTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % backgroundMusicTracks.length;
+            const track = backgroundMusicTracks[currentTrackIndex];
+            
+            if (backgroundAudio && track) {
+                backgroundAudio.src = track.url;
+                backgroundAudio.play().catch(err => {
+                    console.log('Background music autoplay prevented:', err);
+                    // Fallback to user-initiated playback
+                });
+            }
+        }
+
+        function handleBackgroundMusicError() {
+            console.log('Background music error, trying next track');
+            playNextBackgroundTrack();
+        }
+
+        function startBackgroundMusic() {
+            if (!backgroundAudio) initializeBackgroundMusic();
+            
+            const track = backgroundMusicTracks[currentTrackIndex];
+            if (track) {
+                backgroundAudio.src = track.url;
+                backgroundAudio.play().catch(err => {
+                    console.log('Background music requires user interaction:', err);
+                    showToast('Click anywhere to enable background music');
+                    
+                    // Add one-time click listener to start music
+                    const startMusic = () => {
+                        backgroundAudio.play();
+                        document.removeEventListener('click', startMusic);
+                    };
+                    document.addEventListener('click', startMusic);
+                });
+            }
+        }
+
+        function stopBackgroundMusic() {
+            if (backgroundAudio) {
+                backgroundAudio.pause();
+                backgroundAudio.currentTime = 0;
+            }
+        }
+
+        // Enhanced background music controls
+        function createBackgroundMusicPlayer() {
+            const player = document.createElement('div');
+            player.id = 'bg-music-player';
+            player.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(40, 40, 40, 0.95);
+                border-radius: 15px;
+                padding: 15px;
+                min-width: 200px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                z-index: 1000;
+                display: none;
+            `;
+            
+            player.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <button id="bg-play-btn" onclick="toggleBackgroundMusic()" style="background: #1db954; border: none; border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer;">▶</button>
+                    <div style="flex: 1;">
+                        <div id="bg-track-name" style="color: white; font-size: 0.9rem; font-weight: 600;">Background Music</div>
+                        <div id="bg-track-progress" style="width: 100%; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; margin-top: 5px;">
+                            <div id="bg-progress-bar" style="height: 100%; background: #1db954; border-radius: 2px; width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+                <input type="range" id="bg-volume-control" min="0" max="100" value="50" onchange="setBackgroundVolume(this.value)" style="width: 100%; accent-color: #1db954;">
+            `;
+            
+            document.body.appendChild(player);
+            return player;
+        }
+
+        function toggleBackgroundMusic() {
+            const enabled = document.getElementById('bg-music-enabled').checked;
+            if (enabled) {
+                initializeBackgroundMusic();
+                // In a real implementation, you'd start playing background music here
+                console.log('Background music enabled');
+            } else if (backgroundAudio) {
+                backgroundAudio.pause();
+                console.log('Background music disabled');
+            }
+        }
+
+        function setBackgroundVolume(value) {
+            document.getElementById('volume-value').textContent = value + '%';
+            if (backgroundAudio) {
+                backgroundAudio.volume = value / 100;
+            }
+        }
+
+        function setPreviewVolume(value) {
+            document.getElementById('preview-volume-value').textContent = value + '%';
+            // Apply to existing preview audio elements
+            const previews = document.querySelectorAll('audio');
+            previews.forEach(audio => {
+                if (!audio.classList.contains('background-music')) {
+                    audio.volume = value / 100;
+                }
+            });
+        }
+
+        // Modal Management
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Utility Functions
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #1db954;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 10000;
+                transform: translateX(300px);
+                transition: transform 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.style.transform = 'translateX(0)', 100);
+            setTimeout(() => {
+                toast.style.transform = 'translateX(300px)';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        // Initialize application settings
+        function initializeApp() {
+            // Load saved user settings
+            const savedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+            
+            // Apply settings if they exist
+            if (Object.keys(savedSettings).length > 0) {
+                applySettings(savedSettings);
+            }
+            
+            // Initialize background music player if enabled
+            if (savedSettings.backgroundMusic?.enabled) {
+                const player = createBackgroundMusicPlayer();
+                player.style.display = 'block';
+            }
+        }
+
+        // Application initialization on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('spotify_token');
+            if (token) {
+                userToken = token;
+                fetchUserData();
+            }
+            
+            // Initialize app settings
+            initializeApp();
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Escape to close menu or modals
+                if (e.key === 'Escape') {
+                    closeMenu();
+                    ['settings-modal', 'profile-modal', 'favorites-modal', 'ranking-history-modal'].forEach(id => {
+                        const modal = document.getElementById(id);
+                        if (modal && modal.style.display === 'flex') {
+                            closeModal(id);
+                        }
+                    });
+                }
+                
+                // Ctrl/Cmd + , to open settings
+                if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                    e.preventDefault();
+                    showSettings();
+                }
+            });
+        });
 
         function logout() {
             localStorage.removeItem('spotify_token');
