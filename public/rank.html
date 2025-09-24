@@ -1245,8 +1245,11 @@
             
             // Update live statistics
             const statsDisplay = document.getElementById('comparison-stats');
+            const statsBtn = document.getElementById('stats-btn');
+            
             if (comparisons > 5) { // Show stats after a few comparisons
                 statsDisplay.style.display = 'block';
+                statsBtn.style.display = 'inline-block';
                 
                 const skips = comparisonHistory.filter(c => c.type === 'skip').length;
                 const eloValues = Array.from(eloRatings.values());
