@@ -568,6 +568,10 @@
             margin-top: var(--space-8);
             animation: fadeInUp var(--transition-base);
         }
+
+        .playlist-section.show {
+            display: block !important;
+        }
         
         @keyframes fadeInUp {
             from {
@@ -2148,7 +2152,9 @@
                     updateUserProfile();
                     // Hide auth section and show playlist section after successful login
                     document.getElementById('auth-section').style.display = 'none';
-                    document.getElementById('playlist-section').style.display = 'block';
+                    const playlistSection = document.getElementById('playlist-section');
+                    playlistSection.style.display = 'block';
+                    playlistSection.classList.add('show');
                     loadPlaylists();
                 } else {
                     console.error('User profile request failed:', userResponse.status, userResponse.statusText);
@@ -2203,10 +2209,20 @@
         }
 
         async function loadPlaylists() {
+            console.log('=== loadPlaylists called ===');
+            console.log('userToken exists:', !!userToken);
+            console.log('currentUser exists:', !!currentUser);
+            
             try {
-                document.getElementById('playlists-loading').style.display = 'block';
+                const loadingElement = document.getElementById('playlists-loading');
+                if (loadingElement) {
+                    loadingElement.style.display = 'block';
+                    console.log('Loading indicator shown');
+                } else {
+                    console.error('playlists-loading element not found');
+                }
                 
-                console.log('Loading playlists with token:', userToken ? 'Token exists' : 'No token');
+                console.log('Making request to /playlists');
                 
                 const response = await fetch('/playlists', {
                     headers: {
@@ -2215,14 +2231,18 @@
                 });
 
                 console.log('Playlists response status:', response.status);
+                console.log('Response headers:', response.headers);
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Playlists data received:', data);
-                    console.log('Items array:', data.items);
-                    console.log('Items length:', data.items ? data.items.length : 'No items');
+                    console.log('Raw playlists data received:', data);
+                    console.log('Data type:', typeof data);
+                    console.log('Items array exists:', !!data.items);
+                    console.log('Items array length:', data.items ? data.items.length : 'N/A');
+                    
                     allPlaylists = data.items || [];
                     console.log('allPlaylists set to:', allPlaylists);
+                    console.log('About to call displayPlaylists');
                     displayPlaylists();
                 } else {
                     const errorText = await response.text();
@@ -2254,17 +2274,31 @@
 
         function displayPlaylists() {
             console.log('displayPlaylists called with allPlaylists:', allPlaylists);
-            document.getElementById('playlists-loading').style.display = 'none';
+            console.log('allPlaylists type:', typeof allPlaylists);
+            console.log('allPlaylists is array:', Array.isArray(allPlaylists));
+            
+            const loadingElement = document.getElementById('playlists-loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'none';
+            }
+            
             const grid = document.getElementById('playlist-grid');
+            if (!grid) {
+                console.error('playlist-grid element not found!');
+                return;
+            }
+            
             grid.innerHTML = '';
+            console.log('Grid cleared, about to filter playlists');
 
             const filteredPlaylists = filterPlaylists(allPlaylists);
             console.log('Filtered playlists:', filteredPlaylists);
+            console.log('Filtered playlists length:', filteredPlaylists ? filteredPlaylists.length : 'null/undefined');
             console.log('Current filter:', currentFilter);
 
-            if (filteredPlaylists.length === 0) {
+            if (!filteredPlaylists || filteredPlaylists.length === 0) {
                 console.log('No playlists to display');
-                grid.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 40px 0;">No playlists found for this filter</p>';
+                grid.innerHTML = '<p style="text-align: center; opacity: 0.7; padding: 40px 0; color: white;">No playlists found. Make sure you have playlists in your Spotify account.</p>';
                 return;
             }
 
@@ -2331,10 +2365,31 @@
         }
         
         function showMyPlaylists() {
-            // Navigate to playlists section (main functionality)
+            console.log('showMyPlaylists called. userToken:', !!userToken, 'currentUser:', !!currentUser);
+            
+            // Check if user is authenticated
+            if (!userToken) {
+                // User not logged in, show auth section
+                document.getElementById('playlist-section').style.display = 'none';
+                document.getElementById('auth-section').style.display = 'block';
+                showToast('Please sign in to view your playlists');
+                return;
+            }
+            
+            // Navigate to playlists section
             document.getElementById('auth-section').style.display = 'none';
-            document.getElementById('playlist-section').style.display = 'block';
-            console.log('Showing playlists section');
+            const playlistSection = document.getElementById('playlist-section');
+            playlistSection.style.display = 'block';
+            playlistSection.classList.add('show');
+            
+            // Load playlists if user data is available
+            if (currentUser) {
+                console.log('Loading playlists for authenticated user');
+                loadPlaylists();
+            } else {
+                console.log('User token exists but user data not loaded, fetching user data first');
+                fetchUserData();
+            }
         }
 
         function showRankingHistory() {
@@ -2885,6 +2940,31 @@
                 modal.style.display = 'none';
             }
         }
+
+        // Debug Functions
+        function debugPlaylists() {
+            console.log('=== DEBUG PLAYLISTS ===');
+            console.log('userToken:', !!userToken);
+            console.log('currentUser:', !!currentUser);
+            console.log('allPlaylists:', allPlaylists);
+            console.log('playlist-section display:', document.getElementById('playlist-section')?.style.display);
+            console.log('playlist-grid exists:', !!document.getElementById('playlist-grid'));
+            console.log('playlists-loading exists:', !!document.getElementById('playlists-loading'));
+            
+            // Force show playlists section
+            const section = document.getElementById('playlist-section');
+            if (section) {
+                section.style.display = 'block';
+                section.classList.add('show');
+                console.log('Playlist section forced to show');
+            }
+        }
+
+        // Make debug function globally available
+        window.debugPlaylists = debugPlaylists;
+        window.showMyPlaylists = showMyPlaylists;
+        window.loadPlaylists = loadPlaylists;
+        window.displayPlaylists = displayPlaylists;
 
         // Utility Functions
         function showToast(message) {
