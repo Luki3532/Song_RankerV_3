@@ -724,6 +724,140 @@
         }
         
         /* ===== PLAYLIST GRID ===== */
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 24px;
+            padding: 24px 0;
+        }
+        
+        /* ===== SPOTIFY-STYLE PLAYLIST CARDS ===== */
+        .playlist-card {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .playlist-card:hover {
+            background: rgba(50, 50, 50, 0.9);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .playlist-card:hover .playlist-image::after {
+            opacity: 1;
+        }
+        
+        .playlist-image {
+            position: relative;
+        }
+        
+        .playlist-image::after {
+            content: '▶';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(29, 185, 84, 0.9);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            opacity: 0;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding-left: 3px; /* Center the play icon better */
+        }
+        
+        .playlist-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            object-fit: cover;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .playlist-info {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .playlist-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: white;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .playlist-info p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .playlist-stats {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin: 8px 0 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        /* Status badges styling */
+        .playlist-card .playlist-stats div {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        /* Gradient overlay for better text readability */
+        .playlist-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .playlist-card:hover::before {
+            opacity: 1;
+        }
+        
         .playlists-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1064,6 +1198,28 @@
             .auth-section {
                 padding: 20px;
             }
+            
+            /* Very small screens - playlist cards */
+            .playlist-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .playlist-card {
+                padding: 10px;
+            }
+            
+            .playlist-info h3 {
+                font-size: 13px;
+            }
+            
+            .playlist-info p {
+                font-size: 11px;
+            }
+            
+            .playlist-stats {
+                font-size: 10px;
+            }
         }
 
         /* Enhanced Mobile Optimizations */
@@ -1076,6 +1232,32 @@
             }
 
             /* Improve spacing for mobile */
+            .playlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+                padding: 16px 0;
+            }
+            
+            .playlist-card {
+                padding: 12px;
+            }
+            
+            .playlist-image {
+                margin-bottom: 12px;
+            }
+            
+            .playlist-info h3 {
+                font-size: 14px;
+            }
+            
+            .playlist-info p {
+                font-size: 12px;
+            }
+            
+            .playlist-stats {
+                font-size: 11px;
+            }
+            
             .playlists-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -1086,12 +1268,12 @@
                 border-radius: 15px;
             }
 
-            .playlist-info h3 {
+            .playlist-item .playlist-info h3 {
                 font-size: 1.1rem;
                 line-height: 1.3;
             }
 
-            .playlist-stats {
+            .playlist-item .playlist-stats {
                 font-size: 0.9rem;
                 margin-top: 8px;
             }
