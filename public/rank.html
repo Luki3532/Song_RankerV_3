@@ -190,10 +190,11 @@
         }
         
         .no-preview {
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.75rem;
             text-align: center;
             font-style: italic;
+            padding: 5px;
         }
         
         @keyframes pulse {
@@ -336,6 +337,10 @@
         </div>
         
         <div class="comparison-container">
+            <div class="instruction-text" id="instruction-text" style="text-align: center; opacity: 0.7; font-size: 0.9rem; margin-bottom: 15px; display: none;">
+                Choose your preferred song based on the title, artist, and your personal taste
+            </div>
+            
             <div class="song-cards" id="song-cards">
                 <!-- Song cards will be inserted here -->
             </div>
@@ -408,15 +413,19 @@
                     const data = await response.json();
                     songs = data.items.filter(item => item.track).map(item => item.track);
                     
-                    // Debug: Log first few songs to see their structure
-                    console.log('Loaded songs:', songs.slice(0, 3));
-                    console.log('Songs with previews:', songs.filter(song => song.preview_url).length);
-                    console.log('Total songs:', songs.length);
+                    const songsWithPreviews = songs.filter(song => song.preview_url).length;
                     
                     if (songs.length < 2) {
                         alert('This playlist needs at least 2 songs');
                         goBack();
                         return;
+                    }
+                    
+                    // Show preview availability info
+                    if (songsWithPreviews === 0) {
+                        console.log('Note: No preview clips available for songs in this playlist. You can still rank based on song titles and artists.');
+                    } else {
+                        console.log(`${songsWithPreviews} out of ${songs.length} songs have preview clips available.`);
                     }
                     
                     initializeRanking();
@@ -441,6 +450,12 @@
             
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('ranking-interface').style.display = 'block';
+            
+            // Show instruction text if no previews are available
+            const songsWithPreviews = songs.filter(song => song.preview_url).length;
+            if (songsWithPreviews === 0) {
+                document.getElementById('instruction-text').style.display = 'block';
+            }
             
             nextComparison();
         }
@@ -496,16 +511,13 @@
                 ? song.album.images[0].url 
                 : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMjQiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
-            // Debug: Log the song data to see what we're getting
-            console.log(`Song: ${song.name}, Preview URL:`, song.preview_url);
-
             // Create preview controls HTML
             const previewControls = song.preview_url 
                 ? `<div class="preview-controls">
                      <button class="preview-btn" onclick="togglePreview('${song.id}', '${song.preview_url}', this, event)" data-song-id="${song.id}">▶</button>
                    </div>`
                 : `<div class="preview-controls">
-                     <div class="no-preview">No preview available</div>
+                     <div class="no-preview">Preview not available</div>
                    </div>`;
 
             card.innerHTML = `
