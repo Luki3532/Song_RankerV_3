@@ -1432,7 +1432,7 @@
         <div class="menu-header">
             <div class="menu-profile">
                 <img id="menu-profile-img" src="" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; display: none;">
-                <img id="menu-profile-placeholder" src="blank-profile.png" alt="Default Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: var(--space-4); border: 2px solid rgba(255, 255, 255, 0.1);">
+                <img id="menu-profile-placeholder" src="./blank-profile.png" alt="Default Profile" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: var(--space-4); border: 2px solid rgba(255, 255, 255, 0.1);">
                 <div class="menu-profile-info">
                     <h3 id="menu-user-name">Loading...</h3>
                     <p id="menu-user-followers"></p>
@@ -1613,7 +1613,7 @@
                 if (menuPlaceholder) menuPlaceholder.style.display = 'none';
             } else {
                 // Use blank-profile image as placeholder
-                headerProfile.src = 'blank-profile.png';
+                headerProfile.src = './blank-profile.png';
                 headerProfile.style.display = 'block';
                 menuProfile.style.display = 'none';
                 if (menuPlaceholder) menuPlaceholder.style.display = 'block';
