@@ -1,0 +1,19 @@
+version: "1"
+
+services:
+  - type: web
+    name: spotify-api-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SPOTIFY_CLIENT_ID
+        sync: false  # Set manually in Render dashboard
+      - key: SPOTIFY_CLIENT_SECRET
+        sync: false  # Set manually in Render dashboard
+      - key: REDIRECT_URI
+        sync: false  # Set to your Render app URL + /callback
+    healthCheckPath: /

@@ -1,0 +1,28 @@
+{
+  "name": "song_rankerv_3",
+  "version": "1.0.0",
+  "description": "This is a **Node.js + Express backend** (with optional React frontend) for working with the **Spotify Web API**.  \r It handles:\r - OAuth 2.0 Authorization Code Flow  \r - Retrieving access + refresh tokens  \r - Making authenticated API calls to Spotify",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["spotify", "api", "oauth", "node", "express"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "querystring": "^0.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

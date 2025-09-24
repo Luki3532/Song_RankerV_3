@@ -1,0 +1,21 @@
+# Railway Configuration
+# This file configures Railway deployment settings
+
+# Build settings
+[build]
+builder = "nixpacks"
+
+# Service settings
+[service]
+type = "web"
+
+# Environment variables (set these in Railway dashboard)
+# SPOTIFY_CLIENT_ID
+# SPOTIFY_CLIENT_SECRET
+# PORT (automatically set by Railway)
+# REDIRECT_URI (set to your Railway app URL + /callback)
+
+# Deployment settings
+[deploy]
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
