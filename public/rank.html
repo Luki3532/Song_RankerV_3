@@ -100,7 +100,8 @@
             background: linear-gradient(135deg, var(--spotify-dark) 0%, var(--spotify-darker) 50%, var(--spotify-gray-900) 100%);
             color: var(--spotify-white);
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             line-height: var(--line-height-normal);
         }
         
@@ -166,11 +167,12 @@
         }
         
         .comparison-container {
-            height: calc(100vh - 80px);
+            min-height: calc(100vh - 80px);
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         
         .song-cards {
