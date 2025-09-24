@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
+// Ranking page
+app.get('/rank.html', (req, res) => {
+    res.sendFile(__dirname + '/public/rank.html');
+});
+
 // Health check endpoint (for deployment platforms)
 app.get('/health', (req, res) => {
     res.json({ 
@@ -45,7 +50,7 @@ app.get('/health', (req, res) => {
 
 // Redirect to Spotify authorization
 app.get('/login', (req, res) => {
-    const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative';
+    const scope = 'user-read-private user-read-email playlist-read-private playlist-read-collaborative user-library-read';
     const authURL = 'https://accounts.spotify.com/authorize?' +
         querystring.stringify({
             response_type: 'code',
@@ -128,6 +133,59 @@ app.get('/me', async (req, res) => {
     } catch (error) {
         res.status(400).json({
             error: 'Failed to fetch user profile',
+            message: error.message
+        });
+    }
+});
+
+// Get user playlists
+app.get('/playlists', async (req, res) => {
+    const token = req.headers.authorization;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: 'https://api.spotify.com/v1/me/playlists?limit=50',
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        res.status(400).json({
+            error: 'Failed to fetch playlists',
+            message: error.message
+        });
+    }
+});
+
+// Get playlist tracks
+app.get('/playlist/:id/tracks', async (req, res) => {
+    const token = req.headers.authorization;
+    const playlistId = req.params.id;
+    
+    if (!token) {
+        return res.status(401).json({ error: 'No authorization token provided' });
+    }
+
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+            headers: {
+                'Authorization': token
+            }
+        });
+
+        res.json(response.data);
+    } catch (error) {
+        res.status(400).json({
+            error: 'Failed to fetch playlist tracks',
             message: error.message
         });
     }

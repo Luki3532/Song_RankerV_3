@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Ranker - Compare Songs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1db954 0%, #191414 100%);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .ranking-header {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .playlist-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            max-width: 200px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .progress-indicator {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .comparison-container {
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .song-cards {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .song-card {
+            width: 280px;
+            height: 400px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            user-select: none;
+        }
+        
+        .song-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .song-card.selected {
+            transform: scale(0.95);
+            opacity: 0.7;
+        }
+        
+        .album-art {
+            width: 100%;
+            height: 200px;
+            border-radius: 20px 20px 0 0;
+            object-fit: cover;
+        }
+        
+        .song-info {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .song-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .song-artist {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .song-stats {
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+        
+        .elo-rating {
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .vs-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            z-index: 10;
+        }
+        
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
+        }
+        
+        .skip-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .skip-btn:hover {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+        }
+        
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #1db954;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results-screen {
+            display: none;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .results-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        @media (max-width: 640px) {
+            .song-cards {
+                flex-direction: column;
+                gap: 20px;
+                padding: 15px;
+            }
+            
+            .song-card {
+                width: 100%;
+                max-width: 320px;
+                height: 350px;
+            }
+            
+            .vs-indicator {
+                display: none;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <h2>Loading Songs...</h2>
+        <p>Preparing your playlist for ranking</p>
+    </div>
+    
+    <!-- Main Ranking Interface -->
+    <div class="ranking-interface" id="ranking-interface" style="display: none;">
+        <div class="ranking-header">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <div class="playlist-title" id="playlist-title">Loading...</div>
+            <div class="progress-indicator" id="progress">0/0</div>
+        </div>
+        
+        <div class="comparison-container">
+            <div class="song-cards" id="song-cards">
+                <!-- Song cards will be inserted here -->
+            </div>
+            
+            <div class="vs-indicator">VS</div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="selectLeft()">Choose Left</button>
+                <button class="action-btn skip-btn" onclick="skipComparison()">Skip</button>
+                <button class="action-btn" onclick="selectRight()">Choose Right</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Screen -->
+    <div class="results-screen" id="results-screen">
+        <h1 class="results-title">🏆 Rankings Complete!</h1>
+        <div id="final-rankings"></div>
+        <button class="action-btn" onclick="goHome()" style="margin-top: 30px;">
+            Back to Playlists
+        </button>
+    </div>
+
+    <script>
+        let currentPlaylist = null;
+        let songs = [];
+        let currentPair = { left: null, right: null };
+        let comparisons = 0;
+        let totalComparisons = 0;
+        let eloRatings = new Map();
+        
+        // Initialize ELO rating (starting at 1200 for all songs)
+        const INITIAL_ELO = 1200;
+        const K_FACTOR = 32;
+
+        window.onload = function() {
+            const playlistData = localStorage.getItem('current_playlist');
+            if (!playlistData) {
+                alert('No playlist selected');
+                goBack();
+                return;
+            }
+            
+            currentPlaylist = JSON.parse(playlistData);
+            document.getElementById('playlist-title').textContent = currentPlaylist.name;
+            
+            loadPlaylistSongs();
+        };
+
+        async function loadPlaylistSongs() {
+            try {
+                const token = localStorage.getItem('spotify_token');
+                if (!token) {
+                    alert('Please login to Spotify first');
+                    goBack();
+                    return;
+                }
+
+                const response = await fetch(`/playlist/${currentPlaylist.id}/tracks`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    songs = data.items.filter(item => item.track && item.track.preview_url).map(item => item.track);
+                    
+                    if (songs.length < 2) {
+                        alert('This playlist needs at least 2 songs with preview available');
+                        goBack();
+                        return;
+                    }
+                    
+                    initializeRanking();
+                } else {
+                    throw new Error('Failed to load songs');
+                }
+            } catch (error) {
+                console.error('Error loading songs:', error);
+                alert('Unable to load playlist songs');
+                goBack();
+            }
+        }
+
+        function initializeRanking() {
+            // Initialize ELO ratings for all songs
+            songs.forEach(song => {
+                eloRatings.set(song.id, INITIAL_ELO);
+            });
+
+            // Calculate total comparisons needed (roughly n log n comparisons)
+            totalComparisons = Math.ceil(songs.length * Math.log2(songs.length));
+            
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('ranking-interface').style.display = 'block';
+            
+            nextComparison();
+        }
+
+        function nextComparison() {
+            if (comparisons >= totalComparisons) {
+                showResults();
+                return;
+            }
+
+            // Select two random songs (could be improved with better pairing algorithm)
+            const indices = getRandomPair();
+            currentPair.left = songs[indices[0]];
+            currentPair.right = songs[indices[1]];
+
+            displaySongs();
+            updateProgress();
+        }
+
+        function getRandomPair() {
+            const index1 = Math.floor(Math.random() * songs.length);
+            let index2 = Math.floor(Math.random() * songs.length);
+            while (index2 === index1) {
+                index2 = Math.floor(Math.random() * songs.length);
+            }
+            return [index1, index2];
+        }
+
+        function displaySongs() {
+            const container = document.getElementById('song-cards');
+            container.innerHTML = '';
+            
+            // Left song card
+            const leftCard = createSongCard(currentPair.left, 'left');
+            // Right song card  
+            const rightCard = createSongCard(currentPair.right, 'right');
+            
+            container.appendChild(leftCard);
+            container.appendChild(rightCard);
+        }
+
+        function createSongCard(song, side) {
+            const card = document.createElement('div');
+            card.className = 'song-card';
+            card.onclick = () => side === 'left' ? selectLeft() : selectRight();
+
+            const albumImage = song.album.images && song.album.images.length > 0 
+                ? song.album.images[0].url 
+                : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMjQiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+
+            card.innerHTML = `
+                <img src="${albumImage}" alt="${song.name}" class="album-art">
+                <div class="song-info">
+                    <div>
+                        <div class="song-title">${song.name}</div>
+                        <div class="song-artist">${song.artists.map(a => a.name).join(', ')}</div>
+                        <div class="song-stats">
+                            ${song.album.name} • ${Math.floor(song.duration_ms / 60000)}:${String(Math.floor((song.duration_ms % 60000) / 1000)).padStart(2, '0')}
+                        </div>
+                    </div>
+                    <div class="elo-rating">ELO: ${Math.round(eloRatings.get(song.id))}</div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function selectLeft() {
+            selectSong(currentPair.left, currentPair.right);
+        }
+
+        function selectRight() {
+            selectSong(currentPair.right, currentPair.left);
+        }
+
+        function selectSong(winner, loser) {
+            // Update ELO ratings
+            updateELO(winner.id, loser.id);
+            
+            // Visual feedback
+            const cards = document.querySelectorAll('.song-card');
+            cards.forEach(card => card.classList.add('selected'));
+            
+            setTimeout(() => {
+                comparisons++;
+                nextComparison();
+            }, 500);
+        }
+
+        function updateELO(winnerId, loserId) {
+            const winnerElo = eloRatings.get(winnerId);
+            const loserElo = eloRatings.get(loserId);
+
+            const expectedWinner = 1 / (1 + Math.pow(10, (loserElo - winnerElo) / 400));
+            const expectedLoser = 1 / (1 + Math.pow(10, (winnerElo - loserElo) / 400));
+
+            const newWinnerElo = winnerElo + K_FACTOR * (1 - expectedWinner);
+            const newLoserElo = loserElo + K_FACTOR * (0 - expectedLoser);
+
+            eloRatings.set(winnerId, newWinnerElo);
+            eloRatings.set(loserId, newLoserElo);
+        }
+
+        function skipComparison() {
+            comparisons++;
+            nextComparison();
+        }
+
+        function updateProgress() {
+            document.getElementById('progress').textContent = `${comparisons}/${totalComparisons}`;
+        }
+
+        function showResults() {
+            // Sort songs by ELO rating
+            const rankedSongs = songs.sort((a, b) => eloRatings.get(b.id) - eloRatings.get(a.id));
+            
+            document.getElementById('ranking-interface').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const resultsDiv = document.getElementById('final-rankings');
+            resultsDiv.innerHTML = rankedSongs.map((song, index) => `
+                <div style="background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px; border-radius: 10px; display: flex; align-items: center;">
+                    <div style="font-weight: bold; font-size: 1.2rem; margin-right: 15px; min-width: 30px;">#${index + 1}</div>
+                    <img src="${song.album.images[0]?.url}" style="width: 50px; height: 50px; border-radius: 8px; margin-right: 15px;" onerror="this.style.display='none'">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${song.name}</div>
+                        <div style="opacity: 0.7; font-size: 0.9rem;">${song.artists.map(a => a.name).join(', ')}</div>
+                    </div>
+                    <div style="color: #1db954; font-weight: bold;">${Math.round(eloRatings.get(song.id))}</div>
+                </div>
+            `).join('');
+        }
+
+        function goBack() {
+            window.location.href = '/';
+        }
+
+        function goHome() {
+            localStorage.removeItem('current_playlist');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

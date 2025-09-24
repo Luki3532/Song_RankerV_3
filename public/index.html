@@ -3,184 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify API App</title>
+    <title>Song Ranker</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #1db954;
-            text-align: center;
-        }
-        .btn {
-            background-color: #1db954;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1db954 0%, #191414 100%);
             color: white;
-            padding: 12px 24px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .app-header {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .app-subtitle {
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+        
+        .main-content {
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .auth-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .playlist-section {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            color: white;
             border: none;
+            padding: 15px 30px;
             border-radius: 50px;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
-            margin: 10px 5px;
         }
+        
         .btn:hover {
-            background-color: #1aa34a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(29, 185, 84, 0.3);
         }
-        .info {
-            background-color: #e3f2fd;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-left: 4px solid #2196f3;
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        .warning {
-            background-color: #fff3e0;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-left: 4px solid #ff9800;
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 10px 20px rgba(255,255,255,0.1);
         }
-        .token-section {
-            margin-top: 30px;
+        
+        .playlist-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .playlist-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
             padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        #token-display {
-            background: #333;
-            color: #0f0;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            word-break: break-all;
+        
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .playlist-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            float: left;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        
+        .playlist-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .playlist-info p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .playlist-stats {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            clear: both;
             margin-top: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #1db954;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .feature-preview {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .feature-preview h3 {
+            color: #1db954;
+            margin-bottom: 10px;
+        }
+        
+        .feature-preview p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .user-info {
             display: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: block;
+        }
+        
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .auth-section {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎵 Spotify API App</h1>
-        
-        <div class="info">
-            <strong>Welcome!</strong> This app demonstrates Spotify Web API integration using OAuth 2.0.
+    <div class="app-header">
+        <h1 class="app-title">🎵 Song Ranker</h1>
+        <p class="app-subtitle">Rank your music, Tinder-style</p>
+    </div>
+
+    <div class="main-content">
+        <!-- Authentication Section -->
+        <div class="auth-section" id="auth-section">
+            <h2>Welcome to Song Ranker!</h2>
+            <p style="margin: 20px 0; opacity: 0.8;">
+                Connect your Spotify account to start ranking your favorite songs with our Tinder-style comparison system.
+            </p>
+            <a href="/login" class="btn">🔑 Connect Spotify</a>
+            <a href="/logout" class="btn btn-secondary">🚪 Logout</a>
         </div>
 
-        <div id="setup-warning" class="warning">
-            <strong>OAuth Flow Info:</strong> If you don't see the Spotify login screen and go directly to a token, 
-            you're likely already logged into Spotify in this browser. Try:<br>
-            1. Click "Logout from Spotify" first<br>
-            2. Use an incognito/private browser window<br>
-            3. Clear your browser cookies for Spotify
+        <!-- User Profile Section -->
+        <div class="user-info" id="user-info">
+            <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+            <h3 id="user-name">Loading...</h3>
+            <p id="user-followers" style="opacity: 0.7;"></p>
+            <button onclick="logout()" class="btn btn-secondary">Switch Account</button>
         </div>
 
-        <h2>Features</h2>
-        <ul>
-            <li>🔐 OAuth 2.0 Authorization Code Flow</li>
-            <li>🎯 Access & Refresh Token Management</li>
-            <li>👤 User Profile Retrieval</li>
-            <li>🚀 Ready for Playlist & Search Integration</li>
-        </ul>
-
-        <h2>Actions</h2>
-        <a href="/login" class="btn">🔑 Login with Spotify</a>
-        <a href="/logout" class="btn">🚪 Logout from Spotify</a>
-        <button onclick="testProfile()" class="btn" id="test-profile-btn" disabled>👤 Test Profile API</button>
-        <button onclick="clearTokens()" class="btn">🗑️ Clear Tokens</button>
-
-        <div class="token-section">
-            <h3>Token Information</h3>
-            <p>After logging in, your access token will appear here:</p>
-            <div id="token-display"></div>
-            <button onclick="copyToken()" class="btn" id="copy-btn" style="display: none;">📋 Copy Token</button>
+        <!-- Playlist Selection Section -->
+        <div class="playlist-section" id="playlist-section">
+            <h2>Choose a Playlist to Rank</h2>
+            <p style="opacity: 0.8; margin-bottom: 20px;">
+                Select a playlist to start comparing songs and building your personal rankings.
+            </p>
+            
+            <div class="loading" id="playlists-loading">
+                <div class="spinner"></div>
+                <p>Loading your playlists...</p>
+            </div>
+            
+            <div class="playlist-grid" id="playlist-grid"></div>
         </div>
 
-        <div class="info">
-            <strong>Next Steps:</strong>
-            <ol>
-                <li>Get your Spotify API credentials from the <a href="https://developer.spotify.com/dashboard/" target="_blank">Spotify Developer Dashboard</a></li>
-                <li>Add them to your <code>.env</code> file</li>
-                <li>Add <code>http://localhost:3000/callback</code> to your Spotify app's redirect URIs</li>
-                <li>Click "Login with Spotify" to test the integration</li>
-            </ol>
+        <!-- Feature Preview -->
+        <div class="feature-preview">
+            <h3>🏆 Coming Soon</h3>
+            <p>• ELO Rating System<br>• Smart Ranking Algorithms<br>• Artist-based Rankings<br>• Social Features</p>
         </div>
     </div>
 
     <script>
-        let currentToken = null;
+        let currentUser = null;
+        let userToken = null;
 
-        // Check URL for callback parameters
+        // Check for token in URL or localStorage
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
+            
             if (token) {
-                setToken(token);
+                userToken = token;
+                localStorage.setItem('spotify_token', token);
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                userToken = localStorage.getItem('spotify_token');
+            }
+            
+            if (userToken) {
+                initializeApp();
             }
         };
 
-        function setToken(token) {
-            currentToken = token;
-            document.getElementById('token-display').textContent = token;
-            document.getElementById('token-display').style.display = 'block';
-            document.getElementById('copy-btn').style.display = 'inline-block';
-            document.getElementById('test-profile-btn').disabled = false;
-            document.getElementById('setup-warning').style.display = 'none';
+        async function initializeApp() {
+            try {
+                // Get user profile
+                const userResponse = await fetch('/me', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+
+                if (userResponse.ok) {
+                    currentUser = await userResponse.json();
+                    showUserSection();
+                    loadPlaylists();
+                } else {
+                    // Token might be expired
+                    localStorage.removeItem('spotify_token');
+                    showAuthSection();
+                }
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                showAuthSection();
+            }
         }
 
-        async function testProfile() {
-            if (!currentToken) {
-                alert('No access token available. Please login first.');
-                return;
-            }
+        function showAuthSection() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('user-info').style.display = 'none';
+            document.getElementById('playlist-section').style.display = 'none';
+        }
 
+        function showUserSection() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('user-info').style.display = 'block';
+            document.getElementById('playlist-section').style.display = 'block';
+            
+            // Populate user info
+            document.getElementById('user-name').textContent = currentUser.display_name || currentUser.id;
+            document.getElementById('user-followers').textContent = `${currentUser.followers?.total || 0} followers`;
+            
+            if (currentUser.images && currentUser.images.length > 0) {
+                document.getElementById('user-avatar').src = currentUser.images[0].url;
+            }
+        }
+
+        async function loadPlaylists() {
             try {
-                const response = await fetch('/me', {
+                document.getElementById('playlists-loading').style.display = 'block';
+                
+                const response = await fetch('/playlists', {
                     headers: {
-                        'Authorization': `Bearer ${currentToken}`
+                        'Authorization': `Bearer ${userToken}`
                     }
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    alert(`Hello ${data.display_name || data.id}! Your profile was fetched successfully.`);
+                    displayPlaylists(data.items || []);
                 } else {
-                    const error = await response.json();
-                    alert(`Error: ${error.message || 'Failed to fetch profile'}`);
+                    throw new Error('Failed to load playlists');
                 }
             } catch (error) {
-                alert(`Network error: ${error.message}`);
+                console.error('Error loading playlists:', error);
+                document.getElementById('playlists-loading').innerHTML = 
+                    '<p>Unable to load playlists. Please try refreshing.</p>';
             }
         }
 
-        function copyToken() {
-            if (currentToken) {
-                navigator.clipboard.writeText(currentToken).then(() => {
-                    alert('Token copied to clipboard!');
-                });
+        function displayPlaylists(playlists) {
+            document.getElementById('playlists-loading').style.display = 'none';
+            const grid = document.getElementById('playlist-grid');
+            grid.innerHTML = '';
+
+            if (playlists.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; opacity: 0.7;">No playlists found</p>';
+                return;
             }
+
+            playlists.forEach(playlist => {
+                if (playlist.tracks.total > 1) { // Need at least 2 songs to rank
+                    const card = createPlaylistCard(playlist);
+                    grid.appendChild(card);
+                }
+            });
         }
 
-        function clearTokens() {
-            currentToken = null;
-            document.getElementById('token-display').style.display = 'none';
-            document.getElementById('copy-btn').style.display = 'none';
-            document.getElementById('test-profile-btn').disabled = true;
-            document.getElementById('setup-warning').style.display = 'block';
+        function createPlaylistCard(playlist) {
+            const card = document.createElement('div');
+            card.className = 'playlist-card';
+            card.onclick = () => startRanking(playlist);
+
+            const imageUrl = playlist.images && playlist.images.length > 0 
+                ? playlist.images[0].url 
+                : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTAiIGZpbGw9IiM0MDQwNDAiLz4KPHRleHQgeD0iMzAiIHk9IjM1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIyNCI+8J+OtTwvdGV4dD4KPC9zdmc+';
+
+            card.innerHTML = `
+                <img src="${imageUrl}" alt="${playlist.name}" class="playlist-image">
+                <div class="playlist-info">
+                    <h3>${playlist.name}</h3>
+                    <p>${playlist.description || 'No description'}</p>
+                    <div class="playlist-stats">
+                        ${playlist.tracks.total} songs • Ready to rank
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function startRanking(playlist) {
+            // Store playlist info and redirect to ranking page
+            localStorage.setItem('current_playlist', JSON.stringify(playlist));
+            window.location.href = '/rank.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('spotify_token');
+            localStorage.removeItem('current_playlist');
+            currentUser = null;
+            userToken = null;
+            showAuthSection();
             
-            // Clear URL parameters
-            window.history.replaceState({}, document.title, window.location.pathname);
-            alert('Tokens cleared! For a fresh OAuth experience, try using an incognito window.');
+            // Redirect to Spotify logout
+            window.location.href = '/logout';
         }
     </script>
 </body>
