@@ -150,6 +150,58 @@
             margin-top: 10px;
         }
         
+        .preview-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 10px;
+        }
+        
+        .preview-btn {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .preview-btn:hover {
+            background: rgba(52, 152, 219, 0.4);
+            transform: scale(1.1);
+        }
+        
+        .preview-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .preview-btn.playing {
+            background: #3498db;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .no-preview {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(52, 152, 219, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+        }
+        
         .vs-indicator {
             position: absolute;
             top: 50%;
@@ -315,6 +367,10 @@
         let totalComparisons = 0;
         let eloRatings = new Map();
         
+        // Audio preview variables
+        let currentAudio = null;
+        let currentlyPlaying = null;
+        
         // Initialize ELO rating (starting at 1200 for all songs)
         const INITIAL_ELO = 1200;
         const K_FACTOR = 32;
@@ -390,6 +446,11 @@
                 return;
             }
 
+            // Stop any playing audio when moving to next comparison
+            if (currentAudio) {
+                pausePreview();
+            }
+
             // Select two random songs (could be improved with better pairing algorithm)
             const indices = getRandomPair();
             currentPair.left = songs[indices[0]];
@@ -430,6 +491,15 @@
                 ? song.album.images[0].url 
                 : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMzMzMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtc2l6ZT0iMjQiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
+            // Create preview controls HTML
+            const previewControls = song.preview_url 
+                ? `<div class="preview-controls">
+                     <button class="preview-btn" onclick="togglePreview('${song.id}', '${song.preview_url}', this, event)" data-song-id="${song.id}">▶</button>
+                   </div>`
+                : `<div class="preview-controls">
+                     <div class="no-preview">No preview available</div>
+                   </div>`;
+
             card.innerHTML = `
                 <img src="${albumImage}" alt="${song.name}" class="album-art">
                 <div class="song-info">
@@ -440,6 +510,7 @@
                             ${song.album.name} • ${Math.floor(song.duration_ms / 60000)}:${String(Math.floor((song.duration_ms % 60000) / 1000)).padStart(2, '0')}
                         </div>
                     </div>
+                    ${previewControls}
                     <div class="elo-rating">ELO: ${Math.round(eloRatings.get(song.id))}</div>
                 </div>
             `;
@@ -456,6 +527,11 @@
         }
 
         function selectSong(winner, loser) {
+            // Stop any playing audio
+            if (currentAudio) {
+                pausePreview();
+            }
+            
             // Update ELO ratings
             updateELO(winner.id, loser.id);
             
@@ -511,6 +587,78 @@
                     <div style="color: #3498db; font-weight: bold;">${Math.round(eloRatings.get(song.id))}</div>
                 </div>
             `).join('');
+        }
+
+        // Audio preview functions
+        function togglePreview(songId, previewUrl, button, event) {
+            // Prevent triggering the card click event
+            event.stopPropagation();
+            
+            // If this song is already playing, pause it
+            if (currentlyPlaying === songId) {
+                pausePreview();
+                return;
+            }
+            
+            // Stop any currently playing audio
+            if (currentAudio) {
+                currentAudio.pause();
+                updatePlayButton(currentlyPlaying, false);
+            }
+            
+            // Start playing the new song
+            playPreview(songId, previewUrl, button);
+        }
+        
+        function playPreview(songId, previewUrl, button) {
+            currentAudio = new Audio(previewUrl);
+            currentlyPlaying = songId;
+            
+            // Update button state
+            updatePlayButton(songId, true);
+            
+            // Set up event listeners
+            currentAudio.addEventListener('ended', () => {
+                updatePlayButton(songId, false);
+                currentlyPlaying = null;
+                currentAudio = null;
+            });
+            
+            currentAudio.addEventListener('error', () => {
+                alert('Could not play preview');
+                updatePlayButton(songId, false);
+                currentlyPlaying = null;
+                currentAudio = null;
+            });
+            
+            // Play the audio
+            currentAudio.play().catch(error => {
+                console.error('Error playing audio:', error);
+                updatePlayButton(songId, false);
+                currentlyPlaying = null;
+                currentAudio = null;
+            });
+        }
+        
+        function pausePreview() {
+            if (currentAudio) {
+                currentAudio.pause();
+                updatePlayButton(currentlyPlaying, false);
+                currentlyPlaying = null;
+                currentAudio = null;
+            }
+        }
+        
+        function updatePlayButton(songId, isPlaying) {
+            const button = document.querySelector(`[data-song-id="${songId}"]`);
+            if (button) {
+                button.textContent = isPlaying ? '⏸' : '▶';
+                if (isPlaying) {
+                    button.classList.add('playing');
+                } else {
+                    button.classList.remove('playing');
+                }
+            }
         }
 
         function goBack() {
