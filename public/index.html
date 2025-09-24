@@ -1576,6 +1576,9 @@
                     currentUser = await userResponse.json();
                     console.log('User profile loaded:', currentUser);
                     updateUserProfile();
+                    // Hide auth section and show playlist section after successful login
+                    document.getElementById('auth-section').style.display = 'none';
+                    document.getElementById('playlist-section').style.display = 'block';
                     loadPlaylists();
                 } else {
                     console.error('User profile request failed:', userResponse.status, userResponse.statusText);
